@@ -7,8 +7,13 @@
             <!--点击打开新增抽屉-->
             <el-button type="warning" round class="addDrawer" plain @click="openDrawer=true"><el-icon><Plus /></el-icon>&nbsp;添加人才</el-button>
             <!--点击导入抽屉-->
-            <el-button type="success" round class="uploadDrawer"><el-icon><Upload /></el-icon>&nbsp;导入信息</el-button>
-            <el-row :gutter="24">
+             <!--模版导出-->
+             <el-button type="success" round  @click="downloadPersonFile()"><el-icon><Download /></el-icon>&nbsp;导入人员模版下载</el-button>
+               
+             <!--点击导入抽屉-->
+               <el-button type="success" round class="uploadDrawer" @click="drawer2=true"><el-icon><Upload /></el-icon>&nbsp;导入人员</el-button>
+               
+               <el-row :gutter="24">
               <el-col :span="6"><div class="grid-content ep-bg-purple" />
                 <el-input v-model="memberNameValue" placeholder="请输入人员姓名" clearable/>
               </el-col>
@@ -68,7 +73,7 @@
                   <el-button type="primary" @click="searchTable" round ><el-icon><Search /></el-icon></el-button>
                 </el-tooltip>
                 <el-tooltip content="导出数据" placement="top" effect="light">
-                  <el-button type="success" @click="searchTable" round plain><el-icon><Download /></el-icon></el-button>
+                  <el-button type="success" @click="exportTable" round plain><el-icon><Download /></el-icon></el-button>
                 </el-tooltip>
               </el-col>
             </el-row>
@@ -110,6 +115,13 @@
             </el-table-column>
           <el-table-column  prop="tel" label="联系电话" width="120" />
           <el-table-column  prop="email" label="邮箱" width="180" />
+
+          <el-table-column  label="简历附件" width="100">
+              <template #default="scope">
+                <el-link type="primary" @click="updateFileId(scope.row,false)">查看</el-link>
+              </template>
+          </el-table-column>
+
           <el-table-column  show-overflow-tooltip label="渠道" width="200" >
               <template #default="scope">
                 <el-tag size="large" v-if="scope.row.channel=='01'"  >猎聘</el-tag>
@@ -160,10 +172,11 @@
               </template>
           </el-table-column>
           <el-table-column prop="remark" show-overflow-tooltip label="备注"  width="200" />
-          <el-table-column fixed="right" label="操作" width="140">
+          <el-table-column fixed="right" label="操作" width="200">
           <template #default="scope">
             <el-button type="primary" size="small" @click="handleEdit(scope.row)">修改</el-button>
             <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
+            <el-button type="success" size="small" @click="updateFileId(scope.row,true)">上传</el-button>
           </template>
         </el-table-column>
         </el-table>
@@ -278,14 +291,67 @@
         </div>
      </el-drawer>
 
+
+    <!-- 附件上传抽屉 -->
+    <el-drawer  v-model="drawer" size="60%" title="附件上传"
+      direction="ttb"
+      :before-close="handleClose" >
+      <el-upload  v-show="drawerFile"
+          class="upload-demo"
+          drag    
+          action="#" 
+          :on-preview="filePreview"
+          :http-request="fileRequest"
+          :on-remove="fileRemove"
+           v-model:file-list="fileList"
+          :show-file-list="false"
+        >
+          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          <div class="el-upload__text">
+            拖拽文件至此或 <em>点击上传</em>
+          </div>
+        </el-upload>          
+        <el-table :data="fileList" style="width: 80%;margin-left:10%">
+        <el-table-column prop="name" label="文件名" ></el-table-column>
+        <el-table-column prop="uploadingTime" label="上传时间" ></el-table-column>
+        <el-table-column >
+          <template #default="scope">
+            <el-button type="text"  @click="handlePreview(scope.row)"> 预览</el-button>
+            <el-button type="text"  @click="filePreview(scope.row)"> 下载</el-button>
+            <el-button type="text" v-show="drawerFile"  style="color:red" @click="fileRemove(scope.row)"> 删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>      
+    </el-drawer>
+
+
+    <el-drawer  v-model="drawer2" size="60%" title="导入人员"
+      direction="ttb"
+      :before-close="handleClose" >
+      <el-upload  v-show="drawerFile"
+          class="upload-demo"
+          drag    
+          action="#" 
+          :http-request="importPersonFile"
+        >
+          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          <div class="el-upload__text">
+            拖拽文件至此或 <em>点击上传</em>
+          </div>
+        </el-upload>  
+    </el-drawer>
+
+
   </div>
     
 </template>
 
 <script>
 import { reactive, toRefs } from '@vue/reactivity'
-import {listCloud,addToCloud,updateForm,deleteForm} from '../../../api/sdhr03'
+import {listCloud,addToCloud,updateForm,deleteForm,
+  getAllFiles,importFiles,downloadFile,importFiles2,removeFile} from '../../../api/sdhr03'
 import {itemList} from '../../../api/itemApi'
+import { Base64 } from 'js-base64';
 export default {
     name:'Sdhr03',
     setup(){
@@ -331,7 +397,10 @@ export default {
         //查询筛选区域
         // yearList:[],
         // yearId:0,
-
+        fileList:[],
+        drawer:false,
+        drawerFile:true,
+        drawer2:false,
       })
       //渠道下拉框
       let loadChannelList = async()=>{
@@ -515,9 +584,144 @@ export default {
         allData.tableData = r.data.data
         allData.totalNum = r.data.totalNum
       }
+
+      //格式化日期展示
+    let dateFormat= (date) =>{
+      let year=date.substr(0, 4);
+      let month= date.substr(4, 2);
+      let day=date.substr(6, 2);
+      let hours=date.substr(8, 2);
+      let minutes=date.substr(10, 2);
+      let seconds=date.substr(12, 2);      
+      // 拼接
+      return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
+    }
+
+      //导入人员附件
+      let importPersonFile = async(a) => {
+        let formData = new FormData();
+        formData.append('file', a.file);
+        formData.append('businessKeyword', 'sdhr03');
+        console.log(a.file);
+        await importFiles(formData)
+      }
+
+       //导出人员模版
+      let downloadPersonFile =async()=>{
+        let name ="人才库导入模板.xls";
+        let params = {
+          fileId:"Tsdhr03Upload",
+           businessKeyword:'sdhr03'
+         };
+         let url = "file/downloadFile";
+
+         await downloadFile(url,params,name)
+      }
+
+      //预览
+      let handlePreview = async(file)=>{
+            var url = 'http://106.14.152.86:8082/static/sdhr03/'+file.id+file.suffix;  //要预览文件的访问地址          
+            // window.open()居中打开  不想居中的话去掉就行
+            const width = 1000; 
+            const height = 800;
+            const top = (window.screen.availHeight - height) / 2;
+            const left = (window.screen.availWidth - width) / 2;
+            window.open('http://106.14.152.86:8012/onlinePreview?url='
+                +encodeURIComponent(Base64.encode(url)),
+                '', 'width=' + width + ',height=' + height + ',top=' + top + ',left=' + left);  
+      }
+
+      //打开附件页面  
+      let updateFileId =async(row,flag)=>{
+        //赋值
+        allData.fileId = row.memberNo;
+        allData.drawer=true;
+        //判断是查询还是上传
+        flag?allData.drawerFile=true:allData.drawerFile=false;
+       
+        let prams = {
+          businessNo:allData.fileId,
+          businessKeyword:"sdhr03"
+        };
+       
+        let data =  await getAllFiles(prams);
+        //更新展示附件
+        let list = [];
+        data.data.forEach((item) => {
+          let time = dateFormat(item.recCreateTime);
+          list.push({name:item.fileName+item.fileSuffix,id:item.fileId,
+            suffix:item.fileSuffix,url:item.filePath,uploadingTime:time});
+        });  
+        allData.fileList = list; 
+      }
+
+      //自己上传附件方法
+      let fileRequest = async(a) => {
+        //上传附件
+        let formData = new FormData();
+        formData.append('file', a.file);
+        formData.append('businessNo', allData.fileId);
+        formData.append('businessKeyword', 'sdhr03');      
+        await importFiles2(formData);
+
+  
+          //更新附件
+        let prams = {
+          businessNo:allData.fileId,
+          businessKeyword:"sdhr03"
+        };       
+        let fileData =  await getAllFiles(prams);
+        let list = [];
+        fileData.data.forEach((item) => {
+            let time = dateFormat(item.recCreateTime);
+            list.push({name:item.fileName+item.fileSuffix,id:item.fileId,
+            suffix:item.fileSuffix,url:item.filePath,uploadingTime:time});
+        });  
+        allData.fileList = list;   
+      }
+     
+      //点击文件事件，文件下载
+      let filePreview =async(file)=>{
+        let name =file.name;
+        let params = {
+          fileId:file.id,
+           businessKeyword:'sdhr03'
+         };
+        let url = "file/downloadFile";
+        await downloadFile(url,params,name)
+      }
+
+      
+      //附件删除
+      let fileRemove =async (file) => {
+        let formData = new FormData();
+        formData.append('fileId', file.id);
+        await removeFile(formData)      
+        allData.fileList = allData.fileList.filter((i)=>i.id!=file.id);
+      }
+
+
+       //导出数据
+       let exportTable = async() => {
+       
+            let name ="人才库信息导出.xlsx";
+            let params = {
+              memberName:allData.memberNameValue,
+              channel:allData.channelId,
+              archiveReason:allData.acvReasonId,
+              archiveStatusbfr:allData.acvStatusId,
+              educationBckr:allData.edcBckrId
+            };
+              let url = "Sdhr03/export";
+              await downloadFile(url,params,name)       
+      }
+
+
+
       return{
         ...toRefs(allData),
         loadTable,loadEdcBckrList,loadChannelList,searchTable,loadDeptList,loadAcvStatusList,loadItvJobList,handleEdit,drawerClose,editForm,handleDelete,handleCurrentChange
+        ,importPersonFile,downloadPersonFile,updateFileId,fileRemove,fileRequest,filePreview,exportTable,handlePreview,
       }
     }
 }

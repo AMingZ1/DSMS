@@ -130,7 +130,7 @@ export let removeFile = async(params)=>{
 
 //附件导出
 export let downloadFile = async(url,params,name)=>{
-    console.log(url,params,name);
+   
     await $getFile(url,params).then(res => {
         let blob = new Blob([res.data]);            
         let downloadElement = document.createElement('a');
@@ -146,6 +146,7 @@ export let downloadFile = async(url,params,name)=>{
         // 下载完成移除元素
         document.body.removeChild(downloadElement);
         // 释放掉blob对象
+        console.log(href);
         window.URL.revokeObjectURL(href); 
     })
     .catch(() => {

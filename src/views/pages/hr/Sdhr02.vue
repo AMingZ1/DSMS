@@ -626,6 +626,7 @@
         <el-table-column prop="uploadingTime" label="上传时间" ></el-table-column>
         <el-table-column >
           <template #default="scope">
+            <el-button type="text"  @click="handlePreview(scope.row)"> 预览</el-button>
             <el-button type="text"  @click="filePreview(scope.row)"> 下载</el-button>
             <el-button type="text" v-show="drawerFile"  style="color:red" @click="fileRemove(scope.row)"> 删除</el-button>
           </template>
@@ -762,7 +763,7 @@ import {listPerson,addForm,updateForm,
   deleteForm,getAllFiles,importFiles,downloadFile,importFiles2,removeFile} from '../../../api/sdhr02'
 import {addToCloud} from '../../../api/sdhr03'
 import {itemList} from '../../../api/itemApi'
-
+import { Base64 } from 'js-base64';
 //导入封装的消息弹窗
 //import {$msg_success,$msg_warning, $msg_error} from '../utils/msg'
 
@@ -882,8 +883,6 @@ export default {
             deptId2:'',
             itvJobId2:'',
             itvDate:'',
-            workStatusId:'',
-            itvStatusId:'',
             loading:true,
             //查询区域筛选框
             contactStatusList:[{contactStatusId:'',contactStatusName:'请选择联系状态'}],
@@ -1275,6 +1274,18 @@ export default {
          await downloadFile(url,params,name)
       }
 
+      //预览
+      let handlePreview = async(file)=>{
+            var url = 'http://106.14.152.86:8082/static/sdhr02/'+file.id+file.suffix;  //要预览文件的访问地址          
+            // window.open()居中打开  不想居中的话去掉就行
+            const width = 1000;
+            const height = 800;
+            const top = (window.screen.availHeight - height) / 2;
+            const left = (window.screen.availWidth - width) / 2;
+            window.open('http://106.14.152.86:8012/onlinePreview?url='
+                +encodeURIComponent(Base64.encode(url)),
+                '', 'width=' + width + ',height=' + height + ',top=' + top + ',left=' + left);  
+      }
 
         //打开附件页面  
        let updateFilePlanNo =async(row,flag)=>{
@@ -1294,7 +1305,7 @@ export default {
         data.data.forEach((item) => {
           let time = dateFormat(item.recCreateTime);
           list.push({name:item.fileName+item.fileSuffix,id:item.fileId,
-            uploadingTime:time});
+            suffix:item.fileSuffix,url:item.filePath,uploadingTime:time});
         });  
         allData.fileList = list;
    
@@ -1306,7 +1317,9 @@ export default {
         let formData = new FormData();
         formData.append('file', a.file);
         formData.append('businessNo', allData.filePlanNo);
-        formData.append('businessKeyword', 'sdhr02');      
+        formData.append('businessKeyword', 'sdhr02');   
+        
+        console.log(formData);
         await importFiles2(formData);
 
   
@@ -1318,13 +1331,16 @@ export default {
         let fileData =  await getAllFiles(prams);
         let list = [];
         fileData.data.forEach((item) => {
-          list.push({name:item.fileName+item.fileSuffix,id:item.fileId,uploadingTime:item.recCreateTime});
+          let time = dateFormat(item.recCreateTime);
+            list.push({name:item.fileName+item.fileSuffix,id:item.fileId,
+            suffix:item.fileSuffix,url:item.filePath,uploadingTime:time});
         });  
         allData.fileList = list;   
       }
      
       //点击文件事件，文件下载
       let filePreview =async(file)=>{
+      console.log(file);
         let name =file.name;
         let params = {
           fileId:file.id,
@@ -1343,7 +1359,7 @@ export default {
         allData.fileList = allData.fileList.filter((i)=>i.id!=file.id);
       }
 
-
+      
        //导出数据
        let exportTable = async(table) => {
         //区分不同页面的导出
@@ -1562,6 +1578,7 @@ export default {
         exportTable,
         downloadPersonFile,
         importPersonFile,
+        handlePreview,
       }
     }
 }

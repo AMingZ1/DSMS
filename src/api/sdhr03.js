@@ -1,6 +1,6 @@
 //定义人员库API函数--围绕后台实现增删改查
 //导入请求函数
-import {$getData,$post,$put,$delete} from '../utils/request'
+import {$getData,$post,$put,$post2,$getFile} from '../utils/request'
 //导入封装的消息弹窗
 import {$msg_error, $msg_success,$msg_warning,$confirm} from '../utils/msg'
 
@@ -91,4 +91,75 @@ let check=(params)=>{
     }else{
         return true
     }
+}
+
+
+
+
+
+//查询人员附件
+export let getAllFiles = async(params)=>{
+    return await $getData('file/getAllFiles',params);
+}
+
+
+
+//导入人员附件
+export let importFiles = async(params)=>{
+    let data= await $post2('Sdhr03/import',params);
+    if(data.success!='-1'){
+        $msg_success('导入成功')
+    }else{
+        $msg_error('导入失败'+data.message)
+    }
+}
+
+
+
+//导入附件
+export let importFiles2 = async(params)=>{
+    let data= await $post2('file/upload',params);
+    if(data.success!='-1'){
+        $msg_success('导入成功')
+    }else{
+        $msg_error('导入失败'+data.message)
+    }
+}
+
+
+//删除附件
+export let removeFile = async(params)=>{
+    let data= await $post2('file/removeFile',params);
+    if(data.success!='-1'){
+        $msg_success('删除成功')
+    }else{
+        $msg_error('删除失败'+data.message)
+    }
+}
+
+
+
+//附件导出
+export let downloadFile = async(url,params,name)=>{
+    console.log(url,params,name);
+    await $getFile(url,params).then(res => {
+        let blob = new Blob([res.data]);            
+        let downloadElement = document.createElement('a');
+        // 创建下载的链接
+        let href = window.URL.createObjectURL(blob);
+        downloadElement.style.display = 'none';
+        downloadElement.href = href;
+        // 下载后文件名
+        downloadElement.download =  name;
+        document.body.appendChild(downloadElement);
+        // 点击下载
+        downloadElement.click();
+        // 下载完成移除元素
+        document.body.removeChild(downloadElement);
+        // 释放掉blob对象
+        window.URL.revokeObjectURL(href); 
+    })
+    .catch(() => {
+        $msg_error('导出失败')
+    })
 }
