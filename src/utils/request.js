@@ -107,6 +107,8 @@ export let $delete = async(url,params)=>{
 export let $setToken = ()=>{
     //将token信息保存到请求头中
     instance.defaults.headers.common['token'] = sessionStorage.getItem('token');
+    instance2.defaults.headers.common['token'] = sessionStorage.getItem('token');
+    instance3.defaults.headers.common['token'] = sessionStorage.getItem('token');
 }
 
 

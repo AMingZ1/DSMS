@@ -8,7 +8,7 @@
             <el-button type="warning" round class="addDrawer" plain @click="openDrawer=true"><el-icon><Plus /></el-icon>&nbsp;添加人才</el-button>
             <!--点击导入抽屉-->
              <!--模版导出-->
-             <el-button type="success" round  @click="downloadPersonFile()"><el-icon><Download /></el-icon>&nbsp;导入人员模版下载</el-button>
+             <!-- <el-button type="success" round  @click="downloadPersonFile()"><el-icon><Download /></el-icon>&nbsp;导入人员模版下载</el-button>-->
                
              <!--点击导入抽屉-->
                <el-button type="success" round class="uploadDrawer" @click="drawer2=true"><el-icon><Upload /></el-icon>&nbsp;导入人员</el-button>
@@ -601,7 +601,9 @@ export default {
       let importPersonFile = async(a) => {
         let formData = new FormData();
         formData.append('file', a.file);
-        formData.append('businessKeyword', 'sdhr03');
+        formData.append('businessNo', 'sdhr03');
+        formData.append('businessKeyword', 'sdhr03'); 
+
         console.log(a.file);
         await importFiles(formData)
       }
