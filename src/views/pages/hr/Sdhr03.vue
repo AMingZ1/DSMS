@@ -18,6 +18,38 @@
                 <el-input v-model="memberNameValue" placeholder="请输入人员姓名" clearable/>
               </el-col>
               <el-col :span="6"><div class="grid-content ep-bg-purple" />
+                <!-- 查询条件-部门
+                <el-input v-model="deptNameValue" placeholder="请输入人员部门" clearable/>
+                -->
+                <el-select v-model="deptNameValue" filterable  default-first-option
+                 @change="searchTable" class="m-2"  size="mini">
+                  <el-option 
+                    v-for="item in deptList"
+                    :key="item.deptId"
+                    :label="item.deptName"
+                    :value="item.deptId"
+                    ></el-option>
+                </el-select>
+
+              </el-col>
+              <el-col :span="6"><div class="grid-content ep-bg-purple" />
+                <!-- 查询条件-岗位 
+                <el-input v-model="itvJobNameValue" placeholder="请输入人员岗位" clearable/>
+                -->
+                <el-select v-model="itvJobNameValue" filterable default-first-option
+                 @change="searchTable" class="m-2"  size="mini">
+                  <el-option 
+                    v-for="item in itvJobList"
+                    :key="item.itvJobId"
+                    :label="item.itvJobName"
+                    :value="item.itvJobId"
+                    ></el-option>
+                </el-select>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="24">
+              <el-col :span="6">
                 <!-- 查询条件-渠道 -->
                 <el-select v-model="channelId" @change="searchTable" class="m-2"  size="mini">
                     <el-option 
@@ -28,7 +60,7 @@
                       ></el-option>
                 </el-select>
               </el-col>
-              <el-col :span="6"><div class="grid-content ep-bg-purple" />
+              <el-col :span="6">
                 <!-- 查询条件-学历 -->
                 <el-select v-model="edcBckrId" @change="searchTable" class="m-2"  size="mini">
                     <el-option 
@@ -39,12 +71,9 @@
                       ></el-option>
                 </el-select>
               </el-col>
-            </el-row>
-
-            <el-row :gutter="24">
               <el-col :span="6">
                 <!-- 查询条件-归档原因 -->
-                <el-select v-model="acvReasonId" @change="searchTable" class="m-2"  size="mini">
+                <el-select v-model="acvReasonId"  @change="searchTable" class="m-2"  size="mini">
                     <el-option 
                       v-for="item in acvReasonList"
                       :key="item.acvReasonId"
@@ -53,20 +82,7 @@
                       ></el-option>
                 </el-select>
               </el-col>
-              <el-col :span="6">
-                <!-- 查询条件-归档前状态 -->
-                <el-select v-model="acvStatusId" @change="searchTable" class="m-2"  size="mini">
-                    <el-option 
-                      v-for="item in acvStatusList"
-                      :key="item.acvStatusId"
-                      :label="item.acvStatusName"
-                      :value="item.acvStatusId"
-                      ></el-option>
-                </el-select>
-              </el-col>
-              <el-col :span="6">
-                
-              </el-col>
+            
               <el-col :span="6">
                 <span></span>
                 <el-tooltip content="查询" placement="top" effect="light">
@@ -84,34 +100,29 @@
           <el-table-column  prop="memberNo" label="人才编号" width="100" v-if="false" />
           <el-table-column fixed prop="memberName" label="姓名" width="100" />
           <el-table-column  fixed show-overflow-tooltip label="面试部门" width="200" >
-              <template #default="scope">
-                <el-tag size="large" type="info" v-if="scope.row.deptName=='DEPT_001'">能环事业部</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.deptName=='DEPT_002'">石化事业部</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.deptName=='DEPT_003'">MES事业部</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.deptName=='DEPT_004'">智能装备事业部</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.deptName=='DEPT_005'">智慧城市</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.deptName=='DEPT_006'">自动化事业本部-研究所</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.deptName=='DEPT_007'">大数据服务事业部</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.deptName=='DEPT_008'">中铝智能铜创科技</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.deptName=='DEPT_009'">其烨科技</el-tag>
+              <template #default="scope" >          
+                <el-select  v-model="scope.row.deptName"   @change="searchTable" class="m-2"  size="mini">
+                  <el-option v-for="item in deptList2"
+                  :key="item.deptId"
+                  :label="item.deptName"
+                  :value="item.deptId"
+                  ></el-option>
+                </el-select>
               </template>
             </el-table-column>
             <el-table-column  fixed show-overflow-tooltip label="面试岗位" width="200" >
-              <template #default="scope">
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_002'"  >JAVA开发工程师-中级</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_001'"  >JAVA开发工程师-初级</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_003'"  >JAVA开发工程师-高级</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_004'"  >c++开发工程师-初级</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_005'"  >c++开发工程师-中级</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_006'"  >c++开发工程师-高级</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_007'"  >前端开发-初级</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_008'"  >前端开发-中级</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_009'"  >前端开发-高级</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_010'"  >自动化工程师-初级</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_011'"  >自动化工程师-中级</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_012'"  >自动化工程师-高级</el-tag>
-                <el-tag size="large" type="info" v-if="scope.row.itvJob=='JOB_013'"  >项目经理</el-tag>
+               <template #default="scope">
+               <el-select v-model="scope.row.itvJob"   @change="searchTable"
+                 class="m-2"  size="mini">
+                  <el-option v-for="item in itvJobList2"
+                  :key="item.itvJobId"
+                  :label="item.itvJobName"
+                  :value="item.itvJobId"
+                  ></el-option>
+                </el-select>
               </template>
+
+            
             </el-table-column>
           <el-table-column  prop="tel" label="联系电话" width="120" />
           <el-table-column  prop="email" label="邮箱" width="180" />
@@ -172,6 +183,9 @@
               </template>
           </el-table-column>
           <el-table-column prop="remark" show-overflow-tooltip label="备注"  width="200" />
+          <el-table-column prop="recCreateName" label="创建人" width="130"/>
+          <el-table-column prop="recCreateTime" label="创建时间" width="130"/>
+
           <el-table-column fixed="right" label="操作" width="200">
           <template #default="scope">
             <el-button type="primary" size="small" @click="handleEdit(scope.row)">修改</el-button>
@@ -383,10 +397,13 @@ export default {
         acvReasonList:[{acvReasonId:'',acvReasonName:'请选择归档原因'}],
         deptId:'',
         deptList:[{deptId:'',deptName:'请选择面试部门'}],
+        deptList2:[],
         itvJobId:'',
-        itvJobList:[{itvJobId:'',itvJobName:'请选择面试部门'}],
-
+        itvJobList:[{itvJobId:'',itvJobName:'请选择面试岗位'}],
+        itvJobList2:[],
         memberNameValue:'',
+        deptNameValue:'',
+        itvJobNameValue:'',
         openDrawer:false,
         isAdd:true,
         //分页：每页数
@@ -473,6 +490,7 @@ export default {
           if(r){
             for(let i=0 ; i< r.length; i++){
               allData.deptList.push({deptId:r[i].codeEname,deptName:r[i].codeCname})
+              allData.deptList2.push({deptId:r[i].codeEname,deptName:r[i].codeCname})
             }
           }
           
@@ -488,7 +506,8 @@ export default {
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.itvJobList.push({itvJobId:r[i].codeEname,itvJobName:r[i].codeCname})
+              allData.itvJobList.push({itvJobId:r[i].codeEname,itvJobName:r[i].codeCname});
+              allData.itvJobList2.push({itvJobId:r[i].codeEname,itvJobName:r[i].codeCname});
             }
           }
           
@@ -503,8 +522,12 @@ export default {
       loadTable()
 
       let searchTable = async()=>{
-       
+        loadDeptList();
+        loadItvJobList();
+
         let prams = {
+          deptName:allData.deptNameValue,
+          itvJob:allData.itvJobNameValue,
           memberName:allData.memberNameValue,
           channel:allData.channelId,
           archiveReason:allData.acvReasonId,
@@ -573,6 +596,8 @@ export default {
       //分页切换
       let handleCurrentChange=async(val)=>{
         let prams = {
+          deptName:allData.deptNameValue,
+          itvJob:allData.itvJobNameValue,
           memberName:allData.memberNameValue,
           channel:allData.channelId,
           archiveReason:allData.acvReasonId,
@@ -708,6 +733,8 @@ export default {
        
             let name ="人才库信息导出.xlsx";
             let params = {
+              deptName:allData.deptNameValue,
+              itvJob:allData.itvJobNameValue,
               memberName:allData.memberNameValue,
               channel:allData.channelId,
               archiveReason:allData.acvReasonId,
