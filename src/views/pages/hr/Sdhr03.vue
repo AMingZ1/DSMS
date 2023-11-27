@@ -169,7 +169,7 @@
                 <el-tag size="large" v-if="scope.row.archiveStatusbfr=='08'"  >其他</el-tag>
               </template>
             </el-table-column>
-          <el-table-column prop="archiveDate" label="归档时间" width="130"/>
+          <el-table-column prop="archiveDate" label="归档时间" width="200"/>
           <el-table-column prop="workYear" label="工作年限"  width="100" />
           <el-table-column  show-overflow-tooltip label="学历" width="100" >
               <template #default="scope">
@@ -184,7 +184,7 @@
           </el-table-column>
           <el-table-column prop="remark" show-overflow-tooltip label="备注"  width="200" />
           <el-table-column prop="recCreateName" label="创建人" width="130"/>
-          <el-table-column prop="recCreateTime" label="创建时间" width="130"/>
+          <el-table-column prop="recCreateTime" label="创建时间" width="200"/>
 
           <el-table-column fixed="right" label="操作" width="200">
           <template #default="scope">
@@ -419,6 +419,23 @@ export default {
         drawerFile:true,
         drawer2:false,
       })
+
+
+        //格式化日期展示
+      let dateFormat= (date) =>{
+        if(date==" " || date==""){
+          return "";
+        }
+        let year=date.substr(0, 4);
+        let month= date.substr(4, 2);
+        let day=date.substr(6, 2);
+        let hours=date.substr(8, 2);
+        let minutes=date.substr(10, 2);
+        let seconds=date.substr(12, 2);      
+        // 拼接
+        return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
+      }
+
       //渠道下拉框
       let loadChannelList = async()=>{
           let prams={
@@ -489,8 +506,8 @@ export default {
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.deptList.push({deptId:r[i].codeEname,deptName:r[i].codeCname})
-              allData.deptList2.push({deptId:r[i].codeEname,deptName:r[i].codeCname})
+              allData.deptList.push({deptId:r[i].codeEname,deptName:r[i].codeCname});
+              allData.deptList2.push({deptId:r[i].codeEname,deptName:r[i].codeCname});
             }
           }
           
@@ -516,12 +533,20 @@ export default {
       //表格数据加载
       let loadTable = async()=>{
         let r = await listCloud()
-         allData.tableData = r.data.data
-         allData.totalNum = r.totalNum
+         allData.tableData = r.data.data;
+         allData.totalNum = r.totalNum;
+
+         allData.tableData.forEach((item) => {
+          let time = dateFormat(item.recCreateTime);
+          item.recCreateTime = time;
+          
+          item.archiveDate = dateFormat(item.archiveDate);
+        }); 
+
       }
       loadTable()
 
-      let searchTable = async()=>{
+      let searchTable = async()=>{     
         loadDeptList();
         loadItvJobList();
 
@@ -535,8 +560,13 @@ export default {
           educationBckr:allData.edcBckrId
         };
         let r = await listCloud(prams)
-        allData.tableData = r.data.data
-        allData.totalNum = r.data.totalNum
+        allData.tableData = r.data.data;
+        allData.totalNum = r.data.totalNum;
+        allData.tableData.forEach((item) => {
+          let time = dateFormat(item.recCreateTime);
+          item.recCreateTime = time;
+          item.archiveDate = dateFormat(item.archiveDate);
+        }); 
         setTimeout(() => {
                 allData.loading= false
             }, 500);
@@ -606,21 +636,16 @@ export default {
           pageNum:val
         };
         let r = await listCloud(prams)
-        allData.tableData = r.data.data
-        allData.totalNum = r.data.totalNum
+        allData.tableData = r.data.data;
+        allData.totalNum = r.data.totalNum;
+        allData.tableData.forEach((item) => {
+          let time = dateFormat(item.recCreateTime);
+          item.recCreateTime = time;
+          item.archiveDate = dateFormat(item.archiveDate);
+        }); 
       }
 
-      //格式化日期展示
-    let dateFormat= (date) =>{
-      let year=date.substr(0, 4);
-      let month= date.substr(4, 2);
-      let day=date.substr(6, 2);
-      let hours=date.substr(8, 2);
-      let minutes=date.substr(10, 2);
-      let seconds=date.substr(12, 2);      
-      // 拼接
-      return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
-    }
+    
 
       //导入人员附件
       let importPersonFile = async(a) => {
@@ -629,8 +654,8 @@ export default {
         formData.append('businessNo', 'sdhr03');
         formData.append('businessKeyword', 'sdhr03'); 
 
-        console.log(a.file);
-        await importFiles(formData)
+        await importFiles(formData);
+        searchTable();
       }
 
        //导出人员模版
@@ -691,7 +716,6 @@ export default {
         formData.append('businessKeyword', 'sdhr03');      
         await importFiles2(formData);
 
-  
           //更新附件
         let prams = {
           businessNo:allData.fileId,
@@ -704,7 +728,7 @@ export default {
             list.push({name:item.fileName+item.fileSuffix,id:item.fileId,
             suffix:item.fileSuffix,url:item.filePath,uploadingTime:time});
         });  
-        allData.fileList = list;   
+        allData.fileList = list;  
       }
      
       //点击文件事件，文件下载

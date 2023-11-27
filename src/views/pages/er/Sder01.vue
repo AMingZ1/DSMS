@@ -84,36 +84,27 @@
                 </el-table-column>
                 
                 <el-table-column  fixed show-overflow-tooltip label="部门" width="160" >
-                <template #default="scope">
-                    <el-tag size="large"  v-if="scope.row.deptName=='DEPT_001'">能环事业部</el-tag>
-                    <el-tag size="large" v-if="scope.row.deptName=='DEPT_002'">石化事业部</el-tag>
-                    <el-tag size="large" v-if="scope.row.deptName=='DEPT_003'">MES事业部</el-tag>
-                    <el-tag size="large" v-if="scope.row.deptName=='DEPT_004'">智能装备事业部</el-tag>
-                    <el-tag size="large" v-if="scope.row.deptName=='DEPT_005'">智慧城市</el-tag>
-                    <el-tag size="large" v-if="scope.row.deptName=='DEPT_006'">自动化事业本部-研究所</el-tag>
-                    <el-tag size="large" v-if="scope.row.deptName=='DEPT_007'">大数据服务事业部</el-tag>
-                    <el-tag size="large" v-if="scope.row.deptName=='DEPT_008'">中铝智能铜创科技</el-tag>
-                    <el-tag size="large" v-if="scope.row.deptName=='DEPT_009'">其烨科技</el-tag>
-                    <el-tag size="large" v-if="scope.row.deptName=='DEPT_SH'">沈阳东硕-上海基地</el-tag>
-                    <el-tag size="large" v-if="scope.row.deptName=='DEPT_SY'">沈阳东硕-沈阳基地</el-tag>
-                </template>
+                    <template #default="scope" >          
+                        <el-select  v-model="scope.row.deptName"   @change="searchTable" class="m-2"  size="mini">
+                            <el-option v-for="item in deptList2"
+                            :key="item.deptId"
+                            :label="item.deptName"
+                            :value="item.deptId"
+                            ></el-option>
+                        </el-select>
+                    </template>
                 </el-table-column>
                 <el-table-column  fixed show-overflow-tooltip label="岗位" width="150" >
-                <template #default="scope">
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_002'"  >JAVA开发工程师-中级</el-tag>
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_001'"  >JAVA开发工程师-初级</el-tag>
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_003'"  >JAVA开发工程师-高级</el-tag>
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_004'"  >c++开发工程师-初级</el-tag>
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_005'"  >c++开发工程师-中级</el-tag>
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_006'"  >c++开发工程师-高级</el-tag>
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_007'"  >前端开发-初级</el-tag>
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_008'"  >前端开发-中级</el-tag>
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_009'"  >前端开发-高级</el-tag>
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_010'"  >自动化工程师-初级</el-tag>
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_011'"  >自动化工程师-中级</el-tag>
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_012'"  >自动化工程师-高级</el-tag>
-                    <el-tag size="large" v-if="scope.row.jobs=='JOB_013'"  >项目经理</el-tag>
-                </template>
+                    <template #default="scope">
+                        <el-select v-model="scope.row.jobs"   @change="searchTable"
+                            class="m-2"  size="mini">
+                            <el-option v-for="item in itvJobList2"
+                            :key="item.itvJobId"
+                            :label="item.itvJobName"
+                            :value="item.itvJobId"
+                            ></el-option>
+                        </el-select>
+                    </template>
                 </el-table-column>
                 <el-table-column  label="员工状态" width="100">
                     <template #default="scope">
@@ -124,23 +115,32 @@
                 </el-table-column>
                 <el-table-column prop="email" show-overflow-tooltip label="电子邮箱"  width="200" />
                 <el-table-column prop="tel" show-overflow-tooltip label="手机号码"  width="120" />
-                <el-table-column  label="性别" width="80">
+                <el-table-column  label="性别" width="100">           
                     <template #default="scope">
-                    <el-tag size="mini" v-if="scope.row.sex=='1'" type="info" >男</el-tag>
-                    <el-tag size="mini" v-if="scope.row.sex=='2'" type="info" >女</el-tag>
+                        <el-select v-model="scope.row.sex"   @change="searchTable"
+                            class="m-2"  size="mini">
+                            <el-option v-for="item in sexList2"
+                            :key="item.sexId"
+                            :label="item.sexName"
+                            :value="item.sexId"
+                            ></el-option>
+                        </el-select>
                     </template>
                 </el-table-column>
                 <el-table-column prop="secLocation" show-overflow-tooltip label="社保所在地" width="150" />
                 <el-table-column prop="secInf" show-overflow-tooltip label="社保信息" width="200"  />
                 <el-table-column prop="localInf" show-overflow-tooltip label="属地化"  width="200" />
                 <el-table-column prop="national" show-overflow-tooltip label="民族"  width="90" />
-                <el-table-column  label="政治面貌" width="100">
+                <el-table-column  label="政治面貌" width="100">             
                     <template #default="scope">
-                    <el-tag size="mini" v-if="scope.row.politStatus=='0'"  >团员</el-tag>
-                    <el-tag size="mini" v-if="scope.row.politStatus=='1'"  >群众</el-tag>
-                    <el-tag size="mini" v-if="scope.row.politStatus=='2'"  >党员</el-tag>
-                    <el-tag size="mini" v-if="scope.row.politStatus=='3'"  >中共预备党员</el-tag>
-                    <el-tag size="mini" v-if="scope.row.politStatus=='4'"  >预备党员</el-tag>
+                        <el-select v-model="scope.row.politStatus"   @change="searchTable"
+                            class="m-2"  size="mini">
+                            <el-option v-for="item in politStatusList2"
+                            :key="item.politStatusId"
+                            :label="item.politStatusName"
+                            :value="item.politStatusId"
+                            ></el-option>
+                        </el-select>
                     </template>
                 </el-table-column>
                 <el-table-column prop="natPlace" show-overflow-tooltip label="籍贯"  width="100" />
@@ -151,40 +151,55 @@
                 <el-table-column prop="gsCardId" show-overflow-tooltip label="工商银行卡号"  width="120" />
                 <el-table-column  label="血型" width="100">
                     <template #default="scope">
-                    <el-tag size="mini" v-if="scope.row.bloodType=='O'"  >O型</el-tag>
-                    <el-tag size="mini" v-if="scope.row.bloodType=='A'"  >A型</el-tag>
-                    <el-tag size="mini" v-if="scope.row.bloodType=='B'"  >B型</el-tag>
-                    <el-tag size="mini" v-if="scope.row.bloodType=='AB'" >AB型</el-tag>
+                        <el-select v-model="scope.row.bloodType"   @change="searchTable"
+                            class="m-2"  size="mini">
+                            <el-option v-for="item in bloodTypeList2"
+                            :key="item.bloodTypeId"
+                            :label="item.bloodTypeName"
+                            :value="item.bloodTypeId"
+                            ></el-option>
+                        </el-select>
                     </template>
                 </el-table-column>
-                <el-table-column  label="婚姻状况" width="100">
+                <el-table-column  label="婚姻状况" width="100">            
                     <template #default="scope">
-                    <el-tag size="mini" v-if="scope.row.marryStatus=='Y'"  >已婚</el-tag>
-                    <el-tag size="mini" v-if="scope.row.marryStatus=='N'"  >未婚</el-tag>
+                        <el-select v-model="scope.row.marryStatus"   @change="searchTable"
+                            class="m-2"  size="mini">
+                            <el-option v-for="item in marryStatusList2"
+                            :key="item.marryStatusId"
+                            :label="item.marryStatusName"
+                            :value="item.marryStatusId"
+                            ></el-option>
+                        </el-select>
                     </template>
                 </el-table-column>
                 <el-table-column show-overflow-tooltip label="最高学历" width="100">
                     <template #default="scope">
-                    <el-tag size="mini" v-if="scope.row.higEdu=='01'"  >中专</el-tag>
-                    <el-tag size="mini" v-if="scope.row.higEdu=='02'"  >大专</el-tag>
-                    <el-tag size="mini" v-if="scope.row.higEdu=='03'"  >本科</el-tag>
-                    <el-tag size="mini" v-if="scope.row.higEdu=='04'"  >本科学士</el-tag>
-                    <el-tag size="mini" v-if="scope.row.higEdu=='05'"  >硕士研究生</el-tag>
-                    <el-tag size="mini" v-if="scope.row.higEdu=='06'"  >博士研究生</el-tag>
-                    <el-tag size="mini" v-if="scope.row.higEdu=='99'"  >其他</el-tag>
-                    </template>
+                        <el-select v-model="scope.row.higEdu"   @change="searchTable"
+                            class="m-2"  size="mini">
+                            <el-option v-for="item in higEduList2"
+                            :key="item.higEduId"
+                            :label="item.higEduName"
+                            :value="item.higEduId"
+                            ></el-option>
+                        </el-select>
+                    </template>          
                 </el-table-column>
                 <el-table-column prop="universityName" show-overflow-tooltip label="毕业学校"  width="120" />
                 <el-table-column prop="graDate" show-overflow-tooltip label="毕业时间"  width="100" />
                 <el-table-column prop="profession" show-overflow-tooltip label="所学专业"  width="100" />
                 <el-table-column show-overflow-tooltip label="最高学位" width="100">
                     <template #default="scope">
-                    <el-tag size="mini" v-if="scope.row.higDegree=='01'"  >学士</el-tag>
-                    <el-tag size="mini" v-if="scope.row.higDegree=='02'"  >硕士</el-tag>
-                    <el-tag size="mini" v-if="scope.row.higDegree=='03'"  >博士</el-tag>
-                    </template>
-                </el-table-column>
-                
+                        <el-select v-model="scope.row.higDegree"   @change="searchTable"
+                            class="m-2"  size="mini">
+                            <el-option v-for="item in higDegreeList2"
+                            :key="item.higDegreeId"
+                            :label="item.higDegreeName"
+                            :value="item.higDegreeId"
+                            ></el-option>
+                        </el-select>
+                    </template> 
+                </el-table-column>            
                 <el-table-column prop="emeContact" show-overflow-tooltip label="紧急联系人"  width="100" />
                 <el-table-column prop="emeRel" show-overflow-tooltip label="与紧急联系人关系"  width="140" />
                 <el-table-column prop="emeTel" show-overflow-tooltip label="紧急联系人电话"  width="140" />
@@ -237,18 +252,14 @@
             <el-table v-loading="loading" :data="tableData2" stripe border style="width: 100%" >
                 <el-table-column type="selection" width="40" />
                 <el-table-column  fixed show-overflow-tooltip label="部门" width="160" >
-                    <template #default="scope">
-                        <el-tag size="large"  v-if="scope.row.deptName=='DEPT_001'">能环事业部</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_002'">石化事业部</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_003'">MES事业部</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_004'">智能装备事业部</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_005'">智慧城市</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_006'">自动化事业本部-研究所</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_007'">大数据服务事业部</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_008'">中铝智能铜创科技</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_009'">其烨科技</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_SH'">沈阳东硕-上海基地</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_SY'">沈阳东硕-沈阳基地</el-tag>
+                    <template #default="scope" >          
+                        <el-select  v-model="scope.row.deptName"   @change="searchTable" class="m-2"  size="mini">
+                            <el-option v-for="item in deptList2"
+                            :key="item.deptId"
+                            :label="item.deptName"
+                            :value="item.deptId"
+                            ></el-option>
+                        </el-select>
                     </template>
                 </el-table-column>
                 <el-table-column prop="memberId" label="员工编码" width="100" v-if="show" />
@@ -645,27 +656,35 @@ export default {
             birthDate:'',
             deptId:'',
             deptList:[{deptId:'',deptName:'请选择部门信息'}],
+            deptList2:[],
             jobsId:'',
             jobsList:[{jobsId:'',jobsName:'请选择岗位信息'}],
+            itvJobList2:[],     
             isFormalId:'',
             isFormalList:[{isFormalId:'',isFormalName:'请选择人员状态'}],
+            isFormalList2:[],
             sexId:'',
             sexList:[{sexId:'',sexName:'请选择性别'}],
+            sexList2:[],
             politStatusId:'',
             politStatusList:[{politStatusId:'',politStatusName:'请选择政治面貌'}],
+            politStatusList2:[],
             isRemindPId:'',
             isRemindPList:[{isRemindPId:'',isRemindPName:'请选择是否已经试用期到期提醒'}],
             isRemindCId:'',
             isRemindCList:[{isRemindCId:'',isRemindCName:'请选择是否已经合同到期提醒'}],
             bloodTypeId:'',
             bloodTypeList:[{bloodTypeId:'',bloodTypeName:'请选择血型'}],
+            bloodTypeList2:[],
             higEduId:'',
             higEduList:[{higEduId:'',higEduName:'请选择学历'}],
+            higEduList2:[],
             marryStatusId:'',
             marryStatusList:[{marryStatusId:'',marryStatusName:'请选择婚姻状况'}],
+            marryStatusList2:[],
             higDegreeId:'',
             higDegreeList:[{higDegreeId:'',higDegreeName:'请选择最高学位'}],
-            
+            higDegreeList2:[],
             //人员花名册信息新增、修改
             formData:{
                 contractNo:'',
@@ -769,7 +788,8 @@ export default {
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.deptList.push({deptId:r[i].codeEname,deptName:r[i].codeCname})
+              allData.deptList.push({deptId:r[i].codeEname,deptName:r[i].codeCname});
+              allData.deptList2.push({deptId:r[i].codeEname,deptName:r[i].codeCname});
             }
           }
           
@@ -785,22 +805,26 @@ export default {
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.jobsList.push({jobsId:r[i].codeEname,jobsName:r[i].codeCname})
+              allData.jobsList.push({jobsId:r[i].codeEname,jobsName:r[i].codeCname});
+              allData.itvJobList2.push({itvJobId:r[i].codeEname,itvJobName:r[i].codeCname});
             }
           }
           
         }
+
+
         loadJobsList()
         //人员状态下拉框
         let loadIsFormalList = async()=>{
           let prams={
-            codeNo:'sder_isFormal'
+            codeNo:'sdEr_isFormal'
           }
 
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.isFormalList.push({isFormalId:r[i].codeEname,isFormalName:r[i].codeCname})
+              allData.isFormalList.push({isFormalId:r[i].codeEname,isFormalName:r[i].codeCname});
+              allData.isFormalList2.push({isFormalId:r[i].codeEname,isFormalName:r[i].codeCname});  
             }
           }
           
@@ -809,13 +833,14 @@ export default {
         //政治面貌下拉框
         let loadPolitStatusList = async()=>{
           let prams={
-            codeNo:'sder_politStatus'
+            codeNo:'sdEr_politStatus'
           }
 
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.politStatusList.push({politStatusId:r[i].codeEname,politStatusName:r[i].codeCname})
+              allData.politStatusList.push({politStatusId:r[i].codeEname,politStatusName:r[i].codeCname});
+              allData.politStatusList2.push({politStatusId:r[i].codeEname,politStatusName:r[i].codeCname});
             }
           }
           
@@ -824,13 +849,14 @@ export default {
         //性别下拉框
         let loadSexList = async()=>{
           let prams={
-            codeNo:'sder_sex'
+            codeNo:'sdEr_sex'
           }
 
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.sexList.push({sexId:r[i].codeEname,sexName:r[i].codeCname})
+              allData.sexList.push({sexId:r[i].codeEname,sexName:r[i].codeCname});
+              allData.sexList2.push({sexId:r[i].codeEname,sexName:r[i].codeCname});
             }
           }
           
@@ -839,14 +865,13 @@ export default {
         //到期提醒下拉框
         let loadIsOrNoList = async()=>{
           let prams={
-            codeNo:'sder_yesOrNo'
+            codeNo:'sdEr_yesOrNo'
           }
 
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.isRemindPList.push({isRemindPId:r[i].codeEname,isRemindPName:r[i].codeCname})
-              allData.isRemindCList.push({isRemindCId:r[i].codeEname,isRemindCName:r[i].codeCname})
+              allData.isRemindPList.push({isRemindPId:r[i].codeEname,isRemindPName:r[i].codeCname});
             }
           }
           
@@ -856,13 +881,14 @@ export default {
         //血型下拉框
         let loadBloodTypeList = async()=>{
           let prams={
-            codeNo:'sder_bloodType'
+            codeNo:'sdEr_bloodType'
           }
 
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.bloodTypeList.push({bloodTypeId:r[i].codeEname,bloodTypeName:r[i].codeCname})
+              allData.bloodTypeList.push({bloodTypeId:r[i].codeEname,bloodTypeName:r[i].codeCname}); 
+              allData.bloodTypeList2.push({bloodTypeId:r[i].codeEname,bloodTypeName:r[i].codeCname});
             }
           }
           
@@ -878,7 +904,8 @@ export default {
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.higEduList.push({higEduId:r[i].codeEname,higEduName:r[i].codeCname})
+              allData.higEduList.push({higEduId:r[i].codeEname,higEduName:r[i].codeCname});
+              allData.higEduList2.push({higEduId:r[i].codeEname,higEduName:r[i].codeCname});
             }
           }
           
@@ -893,7 +920,8 @@ export default {
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.marryStatusList.push({marryStatusId:r[i].codeEname,marryStatusName:r[i].codeCname})
+              allData.marryStatusList.push({marryStatusId:r[i].codeEname,marryStatusName:r[i].codeCname});
+              allData.marryStatusList2.push({marryStatusId:r[i].codeEname,marryStatusName:r[i].codeCname});
             }
           }
           
@@ -908,7 +936,8 @@ export default {
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.higDegreeList.push({higDegreeId:r[i].codeEname,higDegreeName:r[i].codeCname})
+              allData.higDegreeList.push({higDegreeId:r[i].codeEname,higDegreeName:r[i].codeCname});
+              allData.higDegreeList2.push({higDegreeId:r[i].codeEname,higDegreeName:r[i].codeCname});
             }
           }
           
