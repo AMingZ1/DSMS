@@ -1,9 +1,11 @@
 //定义岗位需求API函数--围绕后台实现增删改查
 //导入请求函数
-import {$getData, $post,$put,$delete} from '../utils/request'
+import {$getData, $post,$put,$getFile,$post2} from '../utils/request'
 
 //导入封装的消息弹窗
-import {$msg_success,$msg_warning,$confirm} from '../utils/msg'
+import {$msg_success,$msg_warning,$confirm, $msg_error} from '../utils/msg'
+
+
 
 //返回所有的岗位需求信息
 export let listJobs = async(params)=>{
@@ -97,5 +99,43 @@ let check=(params)=>{
         return false
     }else{
         return true
+    }
+}
+
+
+
+//附件导出
+export let downloadFile = async(url,params,name)=>{
+    console.log(url,params,name);
+    await $getFile(url,params).then(res => {
+        let blob = new Blob([res.data]);            
+        let downloadElement = document.createElement('a');
+        // 创建下载的链接
+        let href = window.URL.createObjectURL(blob);
+        downloadElement.style.display = 'none';
+        downloadElement.href = href;
+        // 下载后文件名
+        downloadElement.download =  name;
+        document.body.appendChild(downloadElement);
+        // 点击下载
+        downloadElement.click();
+        // 下载完成移除元素
+        document.body.removeChild(downloadElement);
+        // 释放掉blob对象
+        window.URL.revokeObjectURL(href); 
+    })
+    .catch(() => {
+        $msg_error('导出失败')
+    })
+}
+
+
+//导入人员附件
+export let importFiles = async(params)=>{
+    let data= await $post2('Sdhr01/import',params);
+    if(data.success!='-1'){
+        $msg_success('导入成功')
+    }else{
+        $msg_error('导入失败'+data.message)
     }
 }

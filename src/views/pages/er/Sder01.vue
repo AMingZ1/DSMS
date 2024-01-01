@@ -616,29 +616,31 @@
             <el-upload
                 class="upload-demo"
                 drag
-                action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+                action="#" 
                 multiple
+                :file-list="fileList"
+                :on-preview="filePreview"
+                :before-remove="fileRemove"
+                :http-request="fileRequest"
                 >
                 <el-icon class="el-icon--upload"><upload-filled /></el-icon>
                 <div class="el-upload__text">
                     拖拽文件至此或 <em>点击上传</em>
                 </div>
-                <template #tip>
-                    <div class="el-upload__tip">
-                    jpg/png 文件大小不超过 500kb
-                    </div>
-                </template>
                 </el-upload>
         </el-drawer>
     </div>
 </template>
 
 <script>
-import {listperson,addForm,updateForm,deleteForm,deleteForm2,addForm2,updateForm2} from '../../../api/sder01'
+
+import {listperson,addForm,updateForm,deleteForm,deleteForm2,
+    addForm2,updateForm2,downloadFile,importFiles} from '../../../api/sder01'
 import {listPersonPro} from '../../../api/sder02'
 import {itemList} from '../../../api/itemApi'
 import {reactive,toRefs} from 'vue'
 import {  $msg_warning } from '@/utils/msg'
+import { $msg_error } from '@/utils/msg'
 export default {
     name:'Sder01',
     setup(){
@@ -776,7 +778,10 @@ export default {
             formalShowY:false,
             //试用期员工内容
             formalShowN:true,
-
+            //文件列表
+            fileList:[{
+                name:'员工信息导入模版.xlsx'
+            }],
         })
 
         //部门下拉框
@@ -1222,9 +1227,40 @@ export default {
             allData.totalNum = r.data.totalNum
         }
 
+        //点击文件事件，文件下载
+      let filePreview =async(file)=>{
+        let name =file.name;
+        let params = {
+           fileId:'Tsder01Upload',
+           businessKeyword:'sder01'
+         };
+        let url = "file/downloadFile";
+        await downloadFile(url,params,name)
+      }
+
+      
+      //附件删除
+      let fileRemove =async (file) => {
+        if(file.name=='员工信息导入模版.xlsx'){
+          $msg_error('不允许删除原始模板信息！')
+          return false 
+        }
+      }
+
+      //自己上传附件方法
+      let fileRequest = async(a) => {
+        //上传附件
+        let formData = new FormData();
+        formData.append('file', a.file);
+        formData.append('businessNo', allData.fileId);
+        formData.append('businessKeyword', 'sder01');      
+        await importFiles(formData);
+      }
+
         return {
             ...toRefs(allData),
-            loadTable,handleEdit,handleDelete2,editForm,handleDelete,queryMemberP,editForm2,handleEdit2,drawerClose,clickDrawer2,searchTable,handleCurrentChange,handleCurrentChange2
+            loadTable,handleEdit,handleDelete2,editForm,handleDelete,queryMemberP,editForm2,handleEdit2,drawerClose,clickDrawer2,searchTable,handleCurrentChange,handleCurrentChange2,
+            filePreview,fileRemove,fileRequest
         }
     }
 }

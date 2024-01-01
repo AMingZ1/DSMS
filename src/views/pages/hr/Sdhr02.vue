@@ -6,10 +6,7 @@
             <div class="center">
                 <!--点击打开新增抽屉-->
                 <el-button type="warning" round class="addDrawer" plain @click="openDrawer1=true"><el-icon><Plus /></el-icon>&nbsp;添加人员</el-button>
-                
-                <!--模版导出-->
-                <el-button type="success" round  @click="downloadPersonFile()"><el-icon><Download /></el-icon>&nbsp;导入人员模版下载</el-button>
-               
+                 
                 <!--点击导入抽屉-->
                 <el-button type="success" round class="uploadDrawer" @click="drawer2=true"><el-icon><Upload /></el-icon>&nbsp;导入人员</el-button>
                 
@@ -45,10 +42,10 @@
             </div>
                 <el-table v-loading="loading" :data="tableData" stripe border style="width: 100%" >
                     <el-table-column type="selection" width="40" />
-                    <el-table-column  fixed prop="reqNo" label="岗位需求编号" width="120"/>
-                    <el-table-column   prop="planNo" label="计划号(唯一标识)" width="120" v-if="false"/>
+                    <el-table-column  fixed prop="planNo" label="电联记录号" width="120" />
+                    <el-table-column  fixed prop="reqNo" label="岗位需求编号" width="120"/>      
                     <el-table-column  fixed prop="memberName" label="姓名" width="100"/>
-                    <el-table-column  fixed prop="tel" label="联系电话" width="120" />
+                    <el-table-column  prop="tel" label="联系电话" width="120" />
                     <el-table-column  label="联系状态" width="100">
                       <template #default="scope">
                         <el-tag size="large" v-if="scope.row.contactStatus=='10'"  >未联系</el-tag>
@@ -113,7 +110,7 @@
                     <el-button type="primary" @click="searchTable2" round ><el-icon><Search /></el-icon></el-button>
                   </el-tooltip>
                   <el-tooltip content="导出数据" placement="top" effect="light">
-                    <el-button type="success" click="exportTable('2')"  round plain><el-icon><Download /></el-icon></el-button>
+                    <el-button type="success" @click="exportTable('2')"  round plain><el-icon><Download /></el-icon></el-button>
                   </el-tooltip>
                 </el-col>
               </el-row>
@@ -132,36 +129,33 @@
                         <el-tag size="large" v-if="scope.row.contactStatus=='50'"  >已关闭</el-tag>
                       </template>
                     </el-table-column>
+                   
                     <el-table-column  show-overflow-tooltip label="需求部门" width="200" >
-                      <template #default="scope">
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_001'">能环事业部</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_002'">石化事业部</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_003'">MES事业部</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_004'">智能装备事业部</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_005'">智慧城市</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_006'">自动化事业本部-研究所</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_007'">大数据服务事业部</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_008'">中铝智能铜创科技</el-tag>
-                        <el-tag size="large" v-if="scope.row.deptName=='DEPT_009'">其烨科技</el-tag>
-                      </template>
+                      <template #default="scope" >          
+                              <el-select  v-model="scope.row.deptName"   @change="searchTable" class="m-2"  size="mini">
+                                  <el-option v-for="item in deptList2"
+                                  :key="item.deptId"
+                                  :label="item.deptName"
+                                  :value="item.deptId"
+                                  ></el-option>
+                              </el-select>
+                        </template>
                     </el-table-column>
+
                     <el-table-column  show-overflow-tooltip label="需求岗位" width="200" >
                       <template #default="scope">
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_001'"  >JAVA开发工程师-初级</el-tag>
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_002'"  >JAVA开发工程师-中级</el-tag>
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_003'"  >JAVA开发工程师-高级</el-tag>
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_004'"  >c++开发工程师-初级</el-tag>
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_005'"  >c++开发工程师-中级</el-tag>
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_006'"  >c++开发工程师-高级</el-tag>
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_007'"  >前端开发-初级</el-tag>
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_008'"  >前端开发-中级</el-tag>
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_009'"  >前端开发-高级</el-tag>
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_010'"  >自动化工程师-初级</el-tag>
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_011'"  >自动化工程师-中级</el-tag>
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_012'"  >自动化工程师-高级</el-tag>
-                        <el-tag size="large" v-if="scope.row.itvJob=='JOB_013'"  >项目经理</el-tag>
-                      </template>
+                              <el-select v-model="scope.row.itvJob"   @change="searchTable"
+                                  class="m-2"  size="mini">
+                                  <el-option v-for="item in itvJobList2"
+                                  :key="item.itvJobId"
+                                  :label="item.itvJobName"
+                                  :value="item.itvJobId"
+                                  ></el-option>
+                              </el-select>
+                        </template>
                     </el-table-column>
+
+                
                     <el-table-column prop="itvDate" label="计划面试时间" width="120"/>
                     <el-table-column prop="itver" label="面试官" width="100"  />
                         <el-table-column fixed="right" label="操作" width="140">
@@ -247,7 +241,7 @@
                     <el-button type="primary" @click="searchTable3" round ><el-icon><Search /></el-icon></el-button>
                   </el-tooltip>
                   <el-tooltip content="导出数据" placement="top" effect="light">
-                    <el-button type="success"  click="exportTable('3')" round plain><el-icon><Download /></el-icon></el-button>
+                    <el-button type="success"  @click="exportTable('3')" round plain><el-icon><Download /></el-icon></el-button>
                   </el-tooltip>
                 </el-col>
               </el-row>
@@ -257,34 +251,28 @@
               <el-table-column fixed prop="itvDate" label="面试时间" width="120"/>
               <el-table-column fixed prop="memberName" label="姓名" width="100"/>
               <el-table-column  show-overflow-tooltip label="面试部门" width="200" >
-                <template #default="scope">
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_001'">能环事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_002'">石化事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_003'">MES事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_004'">智能装备事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_005'">智慧城市</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_006'">自动化事业本部-研究所</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_007'">大数据服务事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_008'">中铝智能铜创科技</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_009'">其烨科技</el-tag>
-                </template>
+                <template #default="scope" >          
+                        <el-select  v-model="scope.row.deptName"   @change="searchTable" class="m-2"  size="mini">
+                            <el-option v-for="item in deptList2"
+                            :key="item.deptId"
+                            :label="item.deptName"
+                            :value="item.deptId"
+                            ></el-option>
+                        </el-select>
+                  </template>
               </el-table-column>
+
               <el-table-column  show-overflow-tooltip label="面试岗位" width="200" >
                 <template #default="scope">
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_001'"  >JAVA开发工程师-初级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_002'"  >JAVA开发工程师-中级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_003'"  >JAVA开发工程师-高级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_004'"  >c++开发工程师-初级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_005'"  >c++开发工程师-中级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_0 06'"  >c++开发工程师-高级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_007'"  >前端开发-初级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_008'"  >前端开发-中级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_009'"  >前端开发-高级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_010'"  >自动化工程师-初级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_011'"  >自动化工程师-中级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_012'"  >自动化工程师-高级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_013'"  >项目经理</el-tag>
-                </template>
+                        <el-select v-model="scope.row.itvJob"   @change="searchTable"
+                            class="m-2"  size="mini">
+                            <el-option v-for="item in itvJobList2"
+                            :key="item.itvJobId"
+                            :label="item.itvJobName"
+                            :value="item.itvJobId"
+                            ></el-option>
+                        </el-select>
+                  </template>
               </el-table-column>
               <el-table-column  prop="expLevel" label="经验" width="120" />
               <el-table-column  label="职业状态" width="100" >
@@ -698,35 +686,30 @@
               <!-- <el-table-column type="selection" width="40" /> -->
               <el-table-column fixed prop="reqNo" label="岗位需求编号"  width="120" />
               <el-table-column fixed prop="year" label="年份" width="60"/>
-              <el-table-column  show-overflow-tooltip label="需求部门" width="140" >
-                <template #default="scope">
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_001'">能环事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_002'">石化事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_003'">MES事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_004'">智能装备事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_005'">智慧城市</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_006'">自动化事业本部-研究所</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_007'">大数据服务事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_008'">中铝智能铜创科技</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_009'">其烨科技</el-tag>
-                </template>
+               
+              <el-table-column  show-overflow-tooltip label="需求部门" width="200" >
+                <template #default="scope" >          
+                        <el-select  v-model="scope.row.deptName"   @change="searchTable" class="m-2"  size="mini">
+                            <el-option v-for="item in deptList2"
+                            :key="item.deptId"
+                            :label="item.deptName"
+                            :value="item.deptId"
+                            ></el-option>
+                        </el-select>
+                  </template>
               </el-table-column>
+
               <el-table-column  show-overflow-tooltip label="需求岗位" width="200" >
                 <template #default="scope">
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_001'"  >JAVA开发工程师-初级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_002'"  >JAVA开发工程师-中级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_003'"  >JAVA开发工程师-高级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_004'"  >c++开发工程师-初级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_005'"  >c++开发工程师-中级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_006'"  >c++开发工程师-高级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_007'"  >前端开发-初级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_008'"  >前端开发-中级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_009'"  >前端开发-高级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_010'"  >自动化工程师-初级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_011'"  >自动化工程师-中级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_012'"  >自动化工程师-高级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_013'"  >项目经理</el-tag>
-                </template>
+                        <el-select v-model="scope.row.itvJob"   @change="searchTable"
+                            class="m-2"  size="mini">
+                            <el-option v-for="item in itvJobList2"
+                            :key="item.itvJobId"
+                            :label="item.itvJobName"
+                            :value="item.itvJobId"
+                            ></el-option>
+                        </el-select>
+                  </template>
               </el-table-column>
               <el-table-column prop="jobRequire" show-overflow-tooltip label="岗位要求" width="500"  />
               <el-table-column prop="requireNum" label="需求数量"  width="100" />
@@ -858,6 +841,8 @@ export default {
             deptList:[{deptId:'',deptName:'请选择需求部门'}],
             itvJobId:'',
             itvJobList:[{itvJobId:'',itvJobName:'请选择岗位信息'}],
+            deptList2:[{deptId:'',deptName:'请选择需求部门'}],
+            itvJobList2:[{itvJobId:'',itvJobName:'请选择岗位信息'}],
             channelId:'',
             channelList:[{channelId:'',channelName:'请选择渠道'}],
             archiveStatusBfrId:'',
@@ -933,7 +918,8 @@ export default {
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.deptList.push({deptId:r[i].codeEname,deptName:r[i].codeCname})
+              allData.deptList.push({deptId:r[i].codeEname,deptName:r[i].codeCname});
+              allData.deptList2.push({deptId:r[i].codeEname,deptName:r[i].codeCname});
             }
           }
           
@@ -949,7 +935,8 @@ export default {
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.itvJobList.push({itvJobId:r[i].codeEname,itvJobName:r[i].codeCname})
+              allData.itvJobList.push({itvJobId:r[i].codeEname,itvJobName:r[i].codeCname});
+              allData.itvJobList2.push({itvJobId:r[i].codeEname,itvJobName:r[i].codeCname});
             }
           }
           
@@ -1258,8 +1245,12 @@ export default {
       let importPersonFile = async(a) => {
         let formData = new FormData();
         formData.append('file', a.file);
+        formData.append('planNo', 'sdhr02');
         formData.append('businessKeyword', 'sdhr02');
-        await importFiles(formData)
+        await importFiles(formData);
+        searchTable1();
+        searchTable2();
+        searchTable3();
       }
 
        //导出人员模版
@@ -1373,19 +1364,23 @@ export default {
               let url = "Sdhr02/export";
               await downloadFile(url,params,name)
           }else if (table=="2"){
-                           let name ="候选人信息导出.xlsx";
+              let name ="候选人信息导出.xlsx";
               let params = {
+                deptName:allData.deptId,
+                itvJob:allData.itvJobId,
                 contactStatus:'20,30,40,50'
               };
-              let url = "Sdhr02/querySdhr02";
+              let url = "Sdhr02/export";
               await downloadFile(url,params,name)
           
           }else if (table=="3"){
-                           let name ="电话测评信息导出.xlsx";
+              let name ="电话测评信息导出.xlsx";
               let params = {
+                deptName:allData.deptId2,
+                itvJob:allData.itvJobId2,
                 contactStatus:'20,30,40,50'
               };
-              let url = "Sdhr02/querySdhr02";
+              let url = "Sdhr02/export";
               await downloadFile(url,params,name)
           
           }

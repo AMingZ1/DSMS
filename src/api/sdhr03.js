@@ -72,7 +72,7 @@ let check=(params)=>{
         message='添加失败，归档原因不能为空！'
         $msg_warning(message)
         return false
-    }else if (!params.archiveStatusbfr){
+    }else if (!params.archiveStatusBfr){
         message='添加失败，归档前状态不能为空！'
         $msg_warning(message)
         return false

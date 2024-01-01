@@ -6,13 +6,39 @@
           <!--点击打开新增抽屉-->
           <el-button type="warning" round class="addDrawer" plain @click="openDrawer=true"><el-icon><Plus /></el-icon>&nbsp;添加测评信息</el-button>
           <!--点击导入抽屉-->
-          <el-button type="success" round class="uploadDrawer"><el-icon><Upload /></el-icon>&nbsp;导入测评信息</el-button>
+          <el-button type="success" round class="uploadDrawer"  @click="drawer2=true"><el-icon><Upload /></el-icon>&nbsp;导入测评信息</el-button>
           <el-row :gutter="24">
             <el-col :span="6"><div class="grid-content ep-bg-purple" />
               <el-input v-model="memberNameValue" placeholder="请输入人员姓名" clearable/>
             </el-col>
             
-            <el-col :span="6"><div class="grid-content ep-bg-purple" />
+            <el-col :span="6"> <div class="grid-content ep-bg-purple" />
+              <!-- 查询条件-面试结果 -->
+              <el-select v-model="itvStatusId" @change="searchTable" class="m-2"  size="mini">
+                <el-option 
+                  v-for="item in itvStatusList"
+                  :key="item.itvStatusId"
+                  :label="item.itvStatusName"
+                  :value="item.itvStatusId"
+                  ></el-option>
+              </el-select>
+            </el-col>
+           
+            <el-col :span="6"> <div class="grid-content ep-bg-purple" />
+              <el-date-picker 
+                    format="YYYYMMDD" 
+                    value-format="YYYYMMDD" 
+                    v-model="itvDate" 
+                    type="daterange" 
+                    unlink-panels 
+                    start-placeholder="面试时间起"
+                    end-placeholder="面试时间止" 
+                   />
+            </el-col>
+            
+          </el-row>
+          <el-row :gutter="24">
+            <el-col :span="6">
               <!-- 查询条件-部门 -->
               <el-select v-model="deptId" @change="searchTable" class="m-2"  size="mini">
                 <el-option 
@@ -23,7 +49,7 @@
                   ></el-option>
               </el-select>
             </el-col>
-            <el-col :span="6"><div class="grid-content ep-bg-purple" />
+            <el-col :span="6">
               <!-- 查询条件-岗位 -->
               <el-select v-model="itvJobId" @change="searchTable" class="m-2"  size="mini">
                 <el-option 
@@ -35,30 +61,6 @@
               </el-select>
             </el-col>
             
-          </el-row>
-          <el-row :gutter="24">
-            <el-col :span="6"> 
-              <el-date-picker 
-                    format="YYYYMMDD" 
-                    value-format="YYYYMMDD" 
-                    v-model="itvDate" 
-                    type="daterange" 
-                    unlink-panels 
-                    start-placeholder="面试时间起"
-                    end-placeholder="面试时间止" 
-                   />
-            </el-col>
-            <el-col :span="6">
-              <!-- 查询条件-面试结果 -->
-              <el-select v-model="itvStatusId" @change="searchTable" class="m-2"  size="mini">
-                <el-option 
-                  v-for="item in itvStatusList"
-                  :key="item.itvStatusId"
-                  :label="item.itvStatusName"
-                  :value="item.itvStatusId"
-                  ></el-option>
-              </el-select>
-            </el-col>
             <el-col :span="6">
               <!-- 查询条件-当前状态 -->
               <el-select v-model="nowStatusId" @change="searchTable" class="m-2"  size="mini">
@@ -76,7 +78,7 @@
                 <el-button type="primary" @click="searchTable" round ><el-icon><Search /></el-icon></el-button>
               </el-tooltip>
               <el-tooltip content="导出数据" placement="top" effect="light">
-                <el-button type="success" @click="downloadTable" round plain><el-icon><Download /></el-icon></el-button>
+                <el-button type="success" @click="exportTable()" round plain><el-icon><Download /></el-icon></el-button>
               </el-tooltip>
             </el-col>
           </el-row>
@@ -93,70 +95,86 @@
               </template>
             </el-table-column>
             <el-table-column fixed prop="itvDate" label="面试时间" width="120"/>
-            <el-table-column  fixed show-overflow-tooltip label="面试部门" width="200" >
-              <template #default="scope">
-                <el-tag size="large" v-if="scope.row.itvDept=='DEPT_001'">能环事业部</el-tag>
-                <el-tag size="large" v-if="scope.row.itvDept=='DEPT_002'">石化事业部</el-tag>
-                <el-tag size="large" v-if="scope.row.itvDept=='DEPT_003'">MES事业部</el-tag>
-                <el-tag size="large" v-if="scope.row.itvDept=='DEPT_004'">智能装备事业部</el-tag>
-                <el-tag size="large" v-if="scope.row.itvDept=='DEPT_005'">智慧城市</el-tag>
-                <el-tag size="large" v-if="scope.row.itvDept=='DEPT_006'">自动化事业本部-研究所</el-tag>
-                <el-tag size="large" v-if="scope.row.itvDept=='DEPT_007'">大数据服务事业部</el-tag>
-                <el-tag size="large" v-if="scope.row.itvDept=='DEPT_008'">中铝智能铜创科技</el-tag>
-                <el-tag size="large" v-if="scope.row.itvDept=='DEPT_009'">其烨科技</el-tag>
-              </template>
+
+            <el-table-column  show-overflow-tooltip label="面试部门" width="200" >
+              <template #default="scope" >          
+                      <el-select  v-model="scope.row.itvDept"   @change="searchTable" class="m-2"  size="mini">
+                          <el-option v-for="item in deptList2"
+                          :key="item.deptId"
+                          :label="item.deptName"
+                          :value="item.deptId"
+                          ></el-option>
+                      </el-select>
+                </template>
             </el-table-column>
-            <el-table-column  fixed show-overflow-tooltip label="面试岗位" width="200" >
+
+            <el-table-column  show-overflow-tooltip label="面试岗位" width="200" >
               <template #default="scope">
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_001'"  >JAVA开发工程师-初级</el-tag>
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_002'"  >JAVA开发工程师-中级</el-tag>
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_003'"  >JAVA开发工程师-高级</el-tag>
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_004'"  >c++开发工程师-初级</el-tag>
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_005'"  >c++开发工程师-中级</el-tag>
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_006'"  >c++开发工程师-高级</el-tag>
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_007'"  >前端开发-初级</el-tag>
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_008'"  >前端开发-中级</el-tag>
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_009'"  >前端开发-高级</el-tag>
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_010'"  >自动化工程师-初级</el-tag>
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_011'"  >自动化工程师-中级</el-tag>
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_012'"  >自动化工程师-高级</el-tag>
-                <el-tag size="large" v-if="scope.row.itvJob=='JOB_013'"  >项目经理</el-tag>
-              </template>
+                      <el-select v-model="scope.row.itvJob"   @change="searchTable"
+                          class="m-2"  size="mini">
+                          <el-option v-for="item in itvJobList2"
+                          :key="item.itvJobId"
+                          :label="item.itvJobName"
+                          :value="item.itvJobId"
+                          ></el-option>
+                      </el-select>
+                </template>
             </el-table-column>
+
             <el-table-column  label="面试结果" width="100">
               <template #default="scope">
-                <el-tag size="mini" v-if="scope.row.itvStatus=='Y'" type="success" >录用</el-tag>
-                <el-tag size="mini" v-if="scope.row.itvStatus=='S'" type="info" >电联通过</el-tag>
-                <el-tag size="mini" v-if="scope.row.itvStatus=='N'" type="danger" >淘汰</el-tag>
-                <el-tag size="mini" v-if="scope.row.itvStatus=='U'" type="warning" >待定</el-tag>
+                  <el-select v-model="scope.row.itvStatus"   @change="searchTable"
+                      class="m-2"  size="mini">
+                      <el-option v-for="item in itvStatusList"
+                      :key="item.itvStatusId"
+                      :label="item.itvStatusName"
+                      :value="item.itvStatusId"
+                      ></el-option>
+                  </el-select>
               </template>
             </el-table-column>
+            <el-table-column  label="简历附件" width="100">
+                      <template #default="scope">
+                        <el-link type="primary" @click="updateFileItvNo(scope.row,false)">查看</el-link>
+                      </template>
+             </el-table-column>
+
             <el-table-column  label="当前状态" width="100">
               <template #default="scope">
-                <el-tag size="mini" v-if="scope.row.nowStatus=='00'" type="info" >等待面试</el-tag>
-                <el-tag size="mini" v-if="scope.row.nowStatus=='10'" type="primary" >面试通过</el-tag>
-                <el-tag size="mini" v-if="scope.row.nowStatus=='20'" type="danger" >面试未通过</el-tag>
-                <el-tag size="mini" v-if="scope.row.nowStatus=='30'" type="warning" >入人才库</el-tag>
-                <el-tag size="mini" v-if="scope.row.nowStatus=='40'" type="success" >Offer生成</el-tag>
+                  <el-select v-model="scope.row.nowStatus"   @change="searchTable"
+                      class="m-2"  size="mini">
+                      <el-option v-for="item in nowStatusList"
+                      :key="item.nowStatusId"
+                      :label="item.nowStatusName"
+                      :value="item.nowStatusId"
+                      ></el-option>
+                  </el-select>
               </template>
             </el-table-column>
             <el-table-column prop="itver" label="面试官" width="100" />
             <el-table-column  label="面试方式" width="100">
               <template #default="scope">
-                <el-tag size="mini" v-if="scope.row.itvWays=='i1'" type="info" >视频</el-tag>
-                <el-tag size="mini" v-if="scope.row.itvWays=='i2'" type="primary" >当面</el-tag>
+                  <el-select v-model="scope.row.itvWays"   @change="searchTable"
+                      class="m-2"  size="mini">
+                      <el-option v-for="item in itvWaysList"
+                      :key="item.itvWaysId"
+                      :label="item.itvWaysName"
+                      :value="item.itvWaysId"
+                      ></el-option>
+                  </el-select>
               </template>
             </el-table-column>
             <el-table-column prop="universityName" label="学校"  width="200" />
             <el-table-column  label="学历" width="140">
               <template #default="scope">
-                <el-tag size="mini" v-if="scope.row.educationBckr=='01'" >中专</el-tag>
-                <el-tag size="mini" v-if="scope.row.educationBckr=='02'" >大专</el-tag>
-                <el-tag size="mini" v-if="scope.row.educationBckr=='03'" >本科</el-tag>
-                <el-tag size="mini" v-if="scope.row.educationBckr=='04'" >本科学士</el-tag>
-                <el-tag size="mini" v-if="scope.row.educationBckr=='05'" >硕士研究生</el-tag>
-                <el-tag size="mini" v-if="scope.row.educationBckr=='06'" >博士研究生</el-tag>
-                <el-tag size="mini" v-if="scope.row.educationBckr=='99'" >其他</el-tag>
+                  <el-select v-model="scope.row.educationBckr"   @change="searchTable"
+                      class="m-2"  size="mini">
+                      <el-option v-for="item in edcBckrList"
+                      :key="item.edcBckrId"
+                      :label="item.edcBckrName"
+                      :value="item.edcBckrId"
+                      ></el-option>
+                  </el-select>
               </template>
             </el-table-column>
             <el-table-column prop="professionL" label="专业"  width="200" />
@@ -176,8 +194,9 @@
             <el-table-column prop="arrivalDate" label="报道时间"  width="200" />
             <el-table-column prop="hopeSalary" label="期望薪资"  width="130" />
             <el-table-column prop="evaluation" show-overflow-tooltip label="入库主观评价"  width="300" />
-            <el-table-column fixed="right" label="操作" width="300">
+            <el-table-column fixed="right" label="操作" width="350">
               <template #default="scope">
+                <el-button type="success" size="small" @click="updateFileItvNo(scope.row,true)">上传</el-button>
                 <el-button type="primary" size="small" @click="handleEdit(scope.row)">修改</el-button>
                 <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
                 <el-button type="warning" size="small" @click="addCloud(scope.row)">入库</el-button>
@@ -228,7 +247,7 @@
             </div>
             <div class="item">
               <span>面试时间:</span>
-              <el-date-picker format="YYYYMMDD" v-model="formData.itvDate" type="date" placeholder="请选择" :size="size"/>
+              <el-date-picker format="YYYYMMDD" value-format="YYYYMMDD" v-model="formData.itvDate" type="date" placeholder="请选择" :size="size"/>
             </div>
             <div class="item">
               <span>面试官:</span>
@@ -329,7 +348,7 @@
             </div>
             <div class="item">
               <span>报道时间:</span>
-              <el-date-picker format="YYYYMMDD" v-model="formData.arrivalDate" type="date" placeholder="请选择" :size="size"/>
+              <el-date-picker format="YYYYMMDD" value-format="YYYYMMDD" v-model="formData.arrivalDate" type="date" placeholder="请选择" :size="size"/>
             </div>
             <div class="item">
               <span>入库主观评价:</span>
@@ -442,11 +461,64 @@
         </div>
     </el-drawer>
   </div>
+
+
+    <!-- 附件上传抽屉 -->
+    <el-drawer  v-model="drawer" size="60%" title="附件上传"
+      direction="ttb"
+      :before-close="handleClose" >
+      <el-upload  v-show="drawerFile"
+          class="upload-demo"
+          drag    
+          action="#" 
+          :on-preview="filePreview"
+          :http-request="fileRequest"
+          :on-remove="fileRemove"
+           v-model:file-list="fileList"
+          :show-file-list="false"
+        >
+          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          <div class="el-upload__text">
+            拖拽文件至此或 <em>点击上传</em>
+          </div>
+        </el-upload>
+        <el-table :data="fileList" style="width: 80%;margin-left:10%">
+        <el-table-column prop="name" label="文件名" ></el-table-column>
+        <el-table-column prop="uploadingTime" label="上传时间" ></el-table-column>
+        <el-table-column >
+          <template #default="scope">
+            <el-button type="text"  @click="handlePreview(scope.row)"> 预览</el-button>
+            <el-button type="text"  @click="filePreview(scope.row)"> 下载</el-button>
+            <el-button type="text" v-show="drawerFile"  style="color:red" @click="fileRemove(scope.row)"> 删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>      
+    </el-drawer>
+
+
+    <el-drawer  v-model="drawer2" size="60%" title="导入人员"
+      direction="ttb"
+      :before-close="handleClose" >
+      <el-upload  v-show="drawerFile"
+          class="upload-demo"
+          drag    
+          action="#" 
+          :http-request="importPersonFile"
+        >
+          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          <div class="el-upload__text">
+            拖拽文件至此或 <em>点击上传</em>
+          </div>
+        </el-upload>  
+    </el-drawer>
+
 </template>
+
 
 <script>
 import { reactive, toRefs } from '@vue/reactivity'
-import {listTable,addForm,updateForm,deleteForm} from '../../../api/sdhr04'
+import {listTable,addForm,updateForm,deleteForm,importFiles,
+  getAllFiles,downloadFile,importFiles2,removeFile} from '../../../api/sdhr04'
 import {insertOf01} from '../../../api/sdof01'
 import {itemList} from '../../../api/itemApi'
 import {addToCloud} from '../../../api/sdhr03'
@@ -455,6 +527,7 @@ import { CanvasRenderer } from "echarts/renderers";
 import { RadarChart } from "echarts/charts";
 //导入封装的消息弹窗
 import {$msg_error} from '../../../utils/msg'
+import { Base64 } from 'js-base64';
 import {
   TitleComponent,
   TooltipComponent,
@@ -526,6 +599,8 @@ export default {
             itvJobId:'',
             itvJobList:[{itvJobId:'',itvJobName:'请选择面试岗位'}],
             itvStatusId:'',
+            deptList2:[{deptId:'',deptName:'请选择需求部门'}],
+            itvJobList2:[{itvJobId:'',itvJobName:'请选择岗位信息'}],
             itvStatusList:[{itvStatusId:'',itvStatusName:'请选择面试结果'}],
             nowStatusId:'',
             nowStatusList:[{nowStatusId:'',nowStatusName:'请选择当前状态'}],
@@ -548,7 +623,11 @@ export default {
             pageNum:1,
             loading:true,
             isShowRadar:false,
-            dialogVisible:false
+            dialogVisible:false,
+            fileList:[],
+            drawer:false,
+            drawerFile:true,
+            drawer2:false,
         })
         
         const radarVal=reactive([]);
@@ -563,7 +642,8 @@ export default {
           let r= await itemList(prams)
           if(r){
             for(let i=0 ; i< r.length; i++){
-              allData.deptList.push({deptId:r[i].codeEname,deptName:r[i].codeCname})
+              allData.deptList.push({deptId:r[i].codeEname,deptName:r[i].codeCname});
+              allData.deptList2.push({deptId:r[i].codeEname,deptName:r[i].codeCname});
             }
           }
           
@@ -580,6 +660,7 @@ export default {
           if(r){
             for(let i=0 ; i< r.length; i++){
               allData.itvJobList.push({itvJobId:r[i].codeEname,itvJobName:r[i].codeCname})
+              allData.itvJobList2.push({itvJobId:r[i].codeEname,itvJobName:r[i].codeCname})
             }
           }
           
@@ -616,7 +697,7 @@ export default {
           }
           
         }
-
+        loadEdcBckrList();
         //面试方式下拉框
         let loadItvWaysList = async()=>{
           let prams={
@@ -628,10 +709,9 @@ export default {
             for(let i=0 ; i< r.length; i++){
               allData.itvWaysList.push({itvWaysId:r[i].codeEname,itvWaysName:r[i].codeCname})
             }
-          }
-          
+          }     
         }
-
+        loadItvWaysList();
         //当前状态下拉框
         let loadNowStatusList = async()=>{
           let prams={
@@ -662,7 +742,7 @@ export default {
           }
           
         }
-        
+        loadChannelList();
 
         //归档前状态下拉框
         let loadArchiveStatusBfrList = async()=>{
@@ -692,6 +772,7 @@ export default {
           }
           
         }
+        loadEducationBckrList();
         //查询表单数据
         let loadTable= async()=>{
           let r = await listTable()
@@ -766,8 +847,7 @@ export default {
           allData.isAdd=false
           //打开抽屉
           allData.openDrawer=true;
-          loadEdcBckrList()
-          loadItvWaysList()
+    
         }
         let handleDelete =async (row)=>{
           let  prams={
@@ -899,6 +979,137 @@ export default {
           allData.openDrawer2=false
         }
       }
+
+    
+
+       //格式化日期展示
+    let dateFormat= (date) =>{
+      let year=date.substr(0, 4);
+      let month= date.substr(4, 2);
+      let day=date.substr(6, 2);
+      let hours=date.substr(8, 2);
+      let minutes=date.substr(10, 2);
+      let seconds=date.substr(12, 2);      
+      // 拼接
+      return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
+    }
+
+
+     //导入人员附件
+      let importPersonFile = async(a) => {
+        let formData = new FormData();
+        formData.append('file', a.file);
+        formData.append('itvNo', 'sdhr04');
+        formData.append('businessKeyword', 'sdhr04');
+        await importFiles(formData);
+        searchTable();
+      }
+
+
+      //预览
+      let handlePreview = async(file)=>{
+            var url = 'http://106.14.152.86:8082/static/sdhr02/'+file.id+file.suffix;  //要预览文件的访问地址          
+            // window.open()居中打开  不想居中的话去掉就行
+            const width = 1000;
+            const height = 800;
+            const top = (window.screen.availHeight - height) / 2;
+            const left = (window.screen.availWidth - width) / 2;
+            window.open('http://106.14.152.86:8012/onlinePreview?url='
+                +encodeURIComponent(Base64.encode(url)),
+                '', 'width=' + width + ',height=' + height + ',top=' + top + ',left=' + left);  
+      }
+
+        //打开附件页面  
+       let updateFileItvNo =async(row,flag)=>{
+        //赋值
+        allData.fileItvNo = row.itvNo;
+        allData.drawer=true;
+        //判断是查询还是上传
+        flag?allData.drawerFile=true:allData.drawerFile=false;
+       
+        let prams = {
+          businessNo:allData.fileItvNo,
+          businessKeyword:"sdhr04"
+        };
+        let data =  await getAllFiles(prams);
+        //更新展示附件
+        let list = [];
+        data.data.forEach((item) => {
+          let time = dateFormat(item.recCreateTime);
+          list.push({name:item.fileName+item.fileSuffix,id:item.fileId,
+            suffix:item.fileSuffix,url:item.filePath,uploadingTime:time});
+        });  
+        allData.fileList = list;
+   
+      }
+
+      //自己上传附件方法
+      let fileRequest = async(a) => {
+        //上传附件
+        let formData = new FormData();
+        formData.append('file', a.file);
+        formData.append('businessNo', allData.fileItvNo);
+        formData.append('businessKeyword', 'sdhr04');   
+        
+       
+        await importFiles2(formData);
+
+          //更新附件
+        let prams = {
+          businessNo:allData.filePlanNo,
+          businessKeyword:"sdhr04"
+        };       
+        let fileData =  await getAllFiles(prams);
+        let list = [];
+        fileData.data.forEach((item) => {
+          let time = dateFormat(item.recCreateTime);
+            list.push({name:item.fileName+item.fileSuffix,id:item.fileId,
+            suffix:item.fileSuffix,url:item.filePath,uploadingTime:time});
+        });  
+        allData.fileList = list;   
+      }
+     
+      //点击文件事件，文件下载
+      let filePreview =async(file)=>{
+        let name =file.name;
+        let params = {
+          fileId:file.id,
+           businessKeyword:'sdhr04'
+         };
+        let url = "file/downloadFile";
+        await downloadFile(url,params,name)
+      }
+
+      
+      //附件删除
+      let fileRemove =async (file) => {
+        let formData = new FormData();
+        formData.append('fileId', file.id);
+        await removeFile(formData);      
+        allData.fileList = allData.fileList.filter((i)=>i.id!=file.id);
+      }
+
+      
+       //导出数据
+       let exportTable = async() => {
+        let name ="面试测评信息导出.xlsx";
+        let itvDateStr
+          if(allData.itvDate!=null){
+            itvDateStr= allData.itvDate[0]+','+allData.itvDate[1]
+          }
+        let params = {
+            memberName:allData.memberNameValue,
+            itvDept:allData.deptId,
+            itvJob:allData.itvJobId,
+            itvDate:itvDateStr,
+            itvStatus:allData.itvStatusId,
+            nowStatus:allData.nowStatusId
+        };
+        let url = "Sdhr04/export";
+        await downloadFile(url,params,name)
+        
+      }
+
         return {
             ...toRefs(allData),
             loadTable,
@@ -913,7 +1124,8 @@ export default {
             searchTable,
             loadItvStatusList,
             addCloud,
-            addFormToCloud,handleCurrentChange
+            addFormToCloud,handleCurrentChange,fileRemove,
+            importPersonFile,handlePreview,updateFileItvNo,fileRequest,filePreview,exportTable
             
         }
     }

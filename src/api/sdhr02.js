@@ -95,7 +95,7 @@ export let getAllFiles = async(params)=>{
 
 //导入人员附件
 export let importFiles = async(params)=>{
-    let data= await $post2('Sdhr02/import',params);
+    let data= await $post2('Sdhr02/uploadFile',params);
     if(data.success!='-1'){
         $msg_success('导入成功')
     }else{

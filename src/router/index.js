@@ -162,8 +162,19 @@ import "nprogress/nprogress.css";
 
 //定于路由导航前置守卫
 router.beforeEach((to, from, next) => {
-  NProgress.start();
-  next();
+  if(to.path === '/Login'){   
+    next();
+  }else{
+    let token = sessionStorage.getItem('token');
+    console.log(token);
+    if(token==null || token==" "){
+      NProgress.start();
+      next('/Login')
+    }else{
+      NProgress.start();
+      next()
+    }
+  }
 });
 
 //定于路由导航后置守卫

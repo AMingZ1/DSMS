@@ -51,7 +51,7 @@
                 <el-button type="primary" @click="searchTable" round ><el-icon><Search /></el-icon></el-button>
               </el-tooltip>
               <el-tooltip content="导出数据" placement="top" effect="light">
-                <el-button type="success" @click="searchTable" round plain><el-icon><Download /></el-icon></el-button>
+                <el-button type="success" @click="exportTable()" round plain><el-icon><Download /></el-icon></el-button>
               </el-tooltip>
             </el-col>
           </el-row>
@@ -71,34 +71,27 @@
               </el-table-column>
               
               <el-table-column  show-overflow-tooltip label="需求部门" width="140" >
-                <template #default="scope">
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_001'">能环事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_002'">石化事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_003'">MES事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_004'">智能装备事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_005'">智慧城市</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_006'">自动化事业本部-研究所</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_007'">大数据服务事业部</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_008'">中铝智能铜创科技</el-tag>
-                  <el-tag size="large" v-if="scope.row.deptName=='DEPT_009'">其烨科技</el-tag>
-                </template>
+                <template #default="scope" >          
+                        <el-select  v-model="scope.row.deptName"   @change="searchTable" class="m-2"  size="mini">
+                            <el-option v-for="item in deptList2"
+                            :key="item.deptId"
+                            :label="item.deptName"
+                            :value="item.deptId"
+                            ></el-option>
+                        </el-select>
+                    </template>
               </el-table-column>
               <el-table-column  show-overflow-tooltip label="需求岗位" width="200" >
-                <template #default="scope">
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_001'"  >JAVA开发工程师-初级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_002'"  >JAVA开发工程师-中级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_003'"  >JAVA开发工程师-高级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_004'"  >c++开发工程师-初级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_005'"  >c++开发工程师-中级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_006'"  >c++开发工程师-高级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_007'"  >前端开发-初级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_008'"  >前端开发-中级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_009'"  >前端开发-高级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_010'"  >自动化工程师-初级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_011'"  >自动化工程师-中级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_012'"  >自动化工程师-高级</el-tag>
-                  <el-tag size="large" v-if="scope.row.itvJob=='JOB_013'"  >项目经理</el-tag>
-                </template>
+                 <template #default="scope">
+                        <el-select v-model="scope.row.itvJob"   @change="searchTable"
+                            class="m-2"  size="mini">
+                            <el-option v-for="item in itvJobList2"
+                            :key="item.itvJobId"
+                            :label="item.itvJobName"
+                            :value="item.itvJobId"
+                            ></el-option>
+                        </el-select>
+                  </template>
               </el-table-column>
               <el-table-column prop="jobRequire" show-overflow-tooltip label="岗位要求" width="500"  />
               <el-table-column prop="requireNum" label="需求数量"  width="100" />
@@ -176,7 +169,7 @@
           </div>
           <div class="item">
             <span>需求数量:</span>
-            <el-input-number v-model="formData.requireNum" :step="2" step-strictly />
+            <el-input-number v-model="formData.requireNum" :step="1" step-strictly />
           </div>
           <div class="item">
             <span>岗位要求:</span>
@@ -225,14 +218,10 @@
           <el-upload
               class="upload-demo"
               drag
-              :action="hr01_fileUpload_url"
-              :on-success="handleSuccess"
-              :before-upload="beforeUpload"
-              :headers="headers"
-              :data="uploadData"
               :file-list="fileList"
-              :on-preview="fileDownload"
-              :before-remove="removeFile"
+              :on-preview="filePreview"
+              :before-remove="fileRemove"
+              :http-request="fileRequest"
               multiple
             >
               <el-icon class="el-icon--upload"><upload-filled /></el-icon>
@@ -254,13 +243,11 @@
   //导入组合式API
   import {reactive,toRefs} from 'vue'
   //导入访问后台API
-  import {listJobs,addForm,updateForm,deleteForm} from '../../../api/sdhr01'
+  import {listJobs,addForm,updateForm,deleteForm,downloadFile,importFiles} from '../../../api/sdhr01'
   import {itemList} from '../../../api/itemApi'
   //导入上传下载地址
   import {hr01_fileDownload_url,hr01_fileUpload_url} from '../../../config/conster'
-  //导入文件下载方法
-  import {$downloadFile,$beforeUpload} from '../../../api/upload'
-import { $msg_error } from '@/utils/msg'
+  import { $msg_error } from '@/utils/msg'
 
   export default {
     name:'Sdhr01',
@@ -480,44 +467,52 @@ import { $msg_error } from '@/utils/msg'
         allData.totalNum = r.data.totalNum
       }
 
-      //文件上传前
-      let beforeUpload = (file)=>{
-        
-        let uploadTypes=$beforeUpload(file)
-        
-        return uploadTypes
-      }
-
-      //上传成功后
-      let handleSuccess =(res)=>{
-        let {fileName,success} = res
-        if(success){
-          allData.fileName=fileName
-        }
-
-      }
 
       //点击下载文件
-      let fileDownload = async (file)=>{
-        console.log(file)
-        let url=hr01_fileDownload_url
-        let downLoadData = {
-          businessNo:"123",
-          businessKeyword:"sdhr01",
-          fileId:"0de96584328e45fd92cceff0526fc315"
-        }
-        $downloadFile(downLoadData,url,file)
+      let filePreview = async (file)=>{
+        let name =file.name;
+        let params = {
+           fileId:'Tsdhr01Upload',
+           businessKeyword:'sdhr01'
+         };
+        let url = "file/downloadFile";
+        await downloadFile(url,params,name)
        
       }
 
       //文件删除时
-      let removeFile = (file)=>{
-        console.log(file)
+      let fileRemove = (file)=>{
         if(file.name=='岗位需求导入模板.xls'){
           $msg_error('不允许删除原始模板信息！')
           return false 
         }
       }
+
+       //自己上传附件方法
+       let fileRequest = async(a) => {
+        //上传附件
+        let formData = new FormData();
+        formData.append('file', a.file);
+        formData.append('businessNo', allData.fileId);
+        formData.append('businessKeyword', 'sdhr01');      
+        await importFiles(formData);
+      }
+
+       //导出数据
+       let exportTable = async() => {
+      
+          let name ="岗位需求信息导出.xlsx";
+          let params = {
+            year:allData.yearId,
+            deptName:allData.deptId,
+            itvJob:allData.itvJobId,
+            queryHis:allData.queryHisValue
+          };
+          let url = "Sdhr01/export";
+          await downloadFile(url,params,name)
+         
+      }
+      
       
 
       return {
@@ -534,10 +529,10 @@ import { $msg_error } from '@/utils/msg'
         loadItvJobList,
         changeSwitch,
         loadItvWayList,
-        beforeUpload,
-        handleSuccess,
-        fileDownload,
-        removeFile
+        filePreview,
+        fileRemove,
+        fileRequest,
+        exportTable
       }
     }
 
