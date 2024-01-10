@@ -108,7 +108,7 @@
                 </template>
             </el-table-column>
 
-            <el-table-column  show-overflow-tooltip label="面试岗位" width="200" >
+            <el-table-column  show-overflow-tooltip label="面试岗位" width="250" >
               <template #default="scope">
                       <el-select v-model="scope.row.itvJob"   @change="searchTable"
                           class="m-2"  size="mini">
@@ -121,7 +121,7 @@
                 </template>
             </el-table-column>
 
-            <el-table-column  label="面试结果" width="100">
+            <el-table-column  label="面试结果" width="150">
               <template #default="scope">
                   <el-select v-model="scope.row.itvStatus"   @change="searchTable"
                       class="m-2"  size="mini">
@@ -139,7 +139,7 @@
                       </template>
              </el-table-column>
 
-            <el-table-column  label="当前状态" width="100">
+            <el-table-column  label="当前状态" width="150">
               <template #default="scope">
                   <el-select v-model="scope.row.nowStatus"   @change="searchTable"
                       class="m-2"  size="mini">
@@ -190,7 +190,7 @@
             </el-table-column>
             <el-table-column prop="sumScore" label="综合分数"  width="100" />
             <el-table-column prop="tel" label="电话"  width="120" />
-            <el-table-column prop="email" label="邮箱"  width="180" />
+            <!-- <el-table-column prop="email" label="邮箱"  width="180" /> -->
             <el-table-column prop="arrivalDate" label="报道时间"  width="200" />
             <el-table-column prop="hopeSalary" label="期望薪资"  width="130" />
             <el-table-column prop="evaluation" show-overflow-tooltip label="入库主观评价"  width="300" />
@@ -346,6 +346,18 @@
                   ></el-option>
               </el-select>
             </div>
+            <div class="item">
+              <span>当前状态:</span>
+                  <el-select v-model="formData.nowStatus"   placeholder="请选择当前状态"
+                      class="m-2"  size="mini">
+                      <el-option v-for="item in nowStatusList"
+                      :key="item.nowStatusId"
+                      :label="item.nowStatusName"
+                      :value="item.nowStatusId"
+                      ></el-option>
+                  </el-select>
+            </div>
+
             <div class="item">
               <span>报道时间:</span>
               <el-date-picker format="YYYYMMDD" value-format="YYYYMMDD" v-model="formData.arrivalDate" type="date" placeholder="请选择" :size="size"/>
@@ -887,11 +899,8 @@ export default {
           }else if(!row.itvJob){
             $msg_error("请补充面试岗位")
             return false
-          }else if(!row.email){
-            $msg_error("请补充邮箱信息") 
-            return false
           }else if(!row.arrivalDate){
-            $msg_error("请补充入职时间")
+            $msg_error("请补充报道时间")
             return false
           }else if (row.nowStatus!='10'){
             $msg_error("面试还未通过，无法生成Offer信息！")

@@ -73,33 +73,26 @@
               <el-table-column fixed prop="offerNo" label="Offer编号" width="120" />
               <el-table-column fixed prop="memberName" label="姓名" width="120" />
               <el-table-column  fixed show-overflow-tooltip label="入职部门" width="200" >
-                <template #default="scope">
-                  <el-tag size="large"  v-if="scope.row.deptName=='DEPT_001'">能环事业部</el-tag>
-                  <el-tag size="large"  v-if="scope.row.deptName=='DEPT_002'">石化事业部</el-tag>
-                  <el-tag size="large"  v-if="scope.row.deptName=='DEPT_003'">MES事业部</el-tag>
-                  <el-tag size="large"  v-if="scope.row.deptName=='DEPT_004'">智能装备事业部</el-tag>
-                  <el-tag size="large"  v-if="scope.row.deptName=='DEPT_005'">智慧城市</el-tag>
-                  <el-tag size="large"  v-if="scope.row.deptName=='DEPT_006'">自动化事业本部-研究所</el-tag>
-                  <el-tag size="large"  v-if="scope.row.deptName=='DEPT_007'">大数据服务事业部</el-tag>
-                  <el-tag size="large"  v-if="scope.row.deptName=='DEPT_008'">中铝智能铜创科技</el-tag>
-                  <el-tag size="large"  v-if="scope.row.deptName=='DEPT_009'">其烨科技</el-tag>
+                <template #default="scope" >          
+                      <el-select  v-model="scope.row.deptName"   @change="searchTable" class="m-2"  size="mini">
+                          <el-option v-for="item in deptList"
+                          :key="item.deptId"
+                          :label="item.deptName"
+                          :value="item.deptId"
+                          ></el-option>
+                      </el-select>
                 </template>
               </el-table-column>
               <el-table-column  fixed show-overflow-tooltip label="岗位" width="200" >
                 <template #default="scope">
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_002'"  >JAVA开发工程师-中级</el-tag>
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_001'"  >JAVA开发工程师-初级</el-tag>
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_003'"  >JAVA开发工程师-高级</el-tag>
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_004'"  >c++开发工程师-初级</el-tag>
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_005'"  >c++开发工程师-中级</el-tag>
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_006'"  >c++开发工程师-高级</el-tag>
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_007'"  >前端开发-初级</el-tag>
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_008'"  >前端开发-中级</el-tag>
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_009'"  >前端开发-高级</el-tag>
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_010'"  >自动化工程师-初级</el-tag>
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_011'"  >自动化工程师-中级</el-tag>
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_012'"  >自动化工程师-高级</el-tag>
-                  <el-tag size="large"  v-if="scope.row.jobs=='JOB_013'"  >项目经理</el-tag>
+                  <el-select v-model="scope.row.jobs"   @change="searchTable"
+                          class="m-2"  size="mini">
+                          <el-option v-for="item in itvJobList"
+                          :key="item.itvJobId"
+                          :label="item.itvJobName"
+                          :value="item.itvJobId"
+                          ></el-option>
+                      </el-select>
                 </template>
               </el-table-column>
               <el-table-column  prop="approveStatus" label="审批状态" width="100"  >

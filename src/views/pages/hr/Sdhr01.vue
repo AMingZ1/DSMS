@@ -41,26 +41,52 @@
                   ></el-option>
               </el-select>
             </el-col>
-            <el-col :span="2"><div class="grid-content ep-bg-purple" />
+           
+           
+          </el-row>
+            
+          <el-row :gutter="24">
+            <el-col :span="5"> 
+              <el-date-picker 
+                    format="YYYYMMDD" 
+                    value-format="YYYYMMDD" 
+                    v-model="startRecCreateTime" 
+                    placeholder="创建时间起"
+                   />
+            </el-col>
+            <el-col :span="5"> 
+              <el-date-picker 
+                    format="YYYYMMDD" 
+                    value-format="YYYYMMDD" 
+                    v-model="endRecCreateTime" 
+                   placeholder="创建时间止"
+                   />
+            </el-col>
+
+            <el-col :span="7">
                 <el-tooltip content="查询历史"  placement="top" effect="light">
                   <el-switch  inline-prompt active-text="是" inactive-text="否" @change="changeSwitch(val)" v-model="queryHisValue" />
                 </el-tooltip>
             </el-col>
-            <el-col :span="6"><div class="grid-content ep-bg-purple" />
+            <el-col :span="6">
               <el-tooltip content="查询" placement="top" effect="light">
                 <el-button type="primary" @click="searchTable" round ><el-icon><Search /></el-icon></el-button>
               </el-tooltip>
               <el-tooltip content="导出数据" placement="top" effect="light">
                 <el-button type="success" @click="exportTable()" round plain><el-icon><Download /></el-icon></el-button>
               </el-tooltip>
+              <el-tooltip content="删除数据" placement="top" effect="light">
+                <el-button type="success" @click="deleteTable()"  round plain>删除</el-button>
+              </el-tooltip>
             </el-col>
+
           </el-row>
-            
+
           </div>
             <el-table v-loading="loading"
-            :data="tableData" stripe border style="width: 100%" >
+            :data="tableData" stripe border style="width: 100%" @selection-change="handleSelectionChange" >
               <el-table-column type="selection" width="40" />
-              <el-table-column fixed prop="recCreateTime" show-overflow-tooltip label="创建时间" width="100" />
+              <el-table-column fixed prop="recCreateTime"   label="创建时间" width="100" />
               <el-table-column fixed prop="reqNo" label="岗位需求编号" width="120" />
               <el-table-column fixed prop="year" label="年份" width="60"/>
               <el-table-column fixed label="当前状态" width="120">
@@ -243,7 +269,7 @@
   //导入组合式API
   import {reactive,toRefs} from 'vue'
   //导入访问后台API
-  import {listJobs,addForm,updateForm,deleteForm,downloadFile,importFiles} from '../../../api/sdhr01'
+  import {listJobs,addForm,updateForm,deleteForm,deleteForm2,downloadFile,importFiles} from '../../../api/sdhr01'
   import {itemList} from '../../../api/itemApi'
   //导入上传下载地址
   import {hr01_fileDownload_url,hr01_fileUpload_url} from '../../../config/conster'
@@ -254,7 +280,9 @@
     setup(){
       //定义数据
       let allData = reactive({
+        
         tableData:[],
+        selectTableRows: [],
         //是否打开抽屉
         openDrawer:false,
         drawer:false,
@@ -295,8 +323,9 @@
         itvJobList2:[{itvJobId:'',itvJobName:'请选择岗位信息'}],
         itvWayList:[{itvWayId:'',itvWayName:'请选择面试方式'}],
         itvWayId:'',
-
-
+        recCreateTime:'',
+        endRecCreateTime:'',
+        startRecCreateTime:'',
         //文件上传下载定义：
         //头信息中加入token
         headers:{token:sessionStorage.getItem('token')},
@@ -445,7 +474,10 @@
           year:allData.yearId,
           deptName:allData.deptId,
           itvJob:allData.itvJobId,
-          queryHis:allData.queryHisValue
+          queryHis:allData.queryHisValue,
+          startRecCreateTime:allData.startRecCreateTime,
+          endRecCreateTime:allData.endRecCreateTime
+
         };
         
         let r = await listJobs(prams)
@@ -506,14 +538,39 @@
             year:allData.yearId,
             deptName:allData.deptId,
             itvJob:allData.itvJobId,
-            queryHis:allData.queryHisValue
+            queryHis:allData.queryHisValue,
+            startRecCreateTime:allData.startRecCreateTime,
+            endRecCreateTime:allData.endRecCreateTime
           };
           let url = "Sdhr01/export";
           await downloadFile(url,params,name)
          
       }
+
+        //保存选中行数据
+      let handleSelectionChange = async(rows) => {
+        allData.handleSelectionChange=rows;
+        console.log(rows);
+        console.log(allData.handleSelectionChange);
+      }
+
       
-      
+      //删除数据 减选中数据的ID拼接转入到后台
+      let deleteTable = async() => {
+        let reqNos = "";
+        allData.handleSelectionChange.forEach((item) => {  
+          reqNos  += item.reqNo+",";
+        }); 
+        reqNos =reqNos.substring(0,reqNos.length-1);
+        let prams = {
+          reqNo:reqNos
+        };
+        console.log(prams);
+        await deleteForm2(prams);
+        setTimeout(() => {
+          loadTable();
+        }, 2000);
+      }
 
       return {
         ...toRefs(allData),
@@ -532,7 +589,9 @@
         filePreview,
         fileRemove,
         fileRequest,
-        exportTable
+        exportTable,
+        deleteTable,
+        handleSelectionChange
       }
     }
 
