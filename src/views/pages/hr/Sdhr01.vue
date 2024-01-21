@@ -8,7 +8,7 @@
             <!--点击导入抽屉-->
             <el-button type="success" round class="uploadDrawer" @click="drawer=true"><el-icon><Upload /></el-icon>&nbsp;导入需求</el-button>
             <el-row :gutter="24">
-            <el-col :span="5"><div class="grid-content ep-bg-purple" />
+            <el-col :span="6"><div class="grid-content ep-bg-purple" />
               <!-- 查询条件-年份 -->
               <el-select v-model="yearId" @change="searchTable" class="m-2"  size="mini">
                 <el-option 
@@ -19,7 +19,7 @@
                   ></el-option>
               </el-select>
             </el-col>
-            <el-col :span="5"><div class="grid-content ep-bg-purple" />
+            <el-col :span="6"><div class="grid-content ep-bg-purple" />
               <!-- 查询条件-部门 -->
               <el-select v-model="deptId" @change="searchTable" class="m-2"  size="mini">
                 <el-option 
@@ -30,7 +30,7 @@
                   ></el-option>
               </el-select>
             </el-col>
-            <el-col :span="5"><div class="grid-content ep-bg-purple" />
+            <el-col :span="6"><div class="grid-content ep-bg-purple" />
               <!-- 查询条件-岗位 -->
               <el-select v-model="itvJobId" @change="searchTable" class="m-2"  size="mini">
                 <el-option 
@@ -46,16 +46,16 @@
           </el-row>
             
           <el-row :gutter="24">
-            <el-col :span="5"> 
-              <el-date-picker 
+            <el-col :span="6"> 
+              <el-date-picker  style="width:90%"
                     format="YYYYMMDD" 
                     value-format="YYYYMMDD" 
                     v-model="startRecCreateTime" 
                     placeholder="创建时间起"
                    />
             </el-col>
-            <el-col :span="5"> 
-              <el-date-picker 
+            <el-col :span="6"> 
+              <el-date-picker  style="width:90%"
                     format="YYYYMMDD" 
                     value-format="YYYYMMDD" 
                     v-model="endRecCreateTime" 
@@ -63,7 +63,7 @@
                    />
             </el-col>
 
-            <el-col :span="7">
+            <el-col :span="6">
                 <el-tooltip content="查询历史"  placement="top" effect="light">
                   <el-switch  inline-prompt active-text="是" inactive-text="否" @change="changeSwitch(val)" v-model="queryHisValue" />
                 </el-tooltip>
@@ -86,7 +86,7 @@
             <el-table v-loading="loading"
             :data="tableData" stripe border style="width: 100%" @selection-change="handleSelectionChange" >
               <el-table-column type="selection" width="40" />
-              <el-table-column fixed prop="recCreateTime"   label="创建时间" width="100" />
+              <el-table-column fixed prop="recCreateTime"   label="创建时间" width="120" />
               <el-table-column fixed prop="reqNo" label="岗位需求编号" width="120" />
               <el-table-column fixed prop="year" label="年份" width="60"/>
               <el-table-column fixed label="当前状态" width="120">
@@ -344,12 +344,30 @@
         
       })
       
-      
+        //格式化日期展示
+        let dateFormat= (date) =>{
+        if(date==" " || date==""){
+          return "";
+        }
+        let year=date.substr(0, 4);
+        let month= date.substr(4, 2);
+        let day=date.substr(6, 2);      
+        // 拼接
+        return year+"-"+month+"-"+day;
+      }
+
       //加载表格数据
       let loadTable = async()=>{
          let r = await listJobs()
          allData.tableData = r.data.data
          allData.totalNum = r.data.totalNum
+
+         allData.tableData.forEach((item) => {
+       
+          item.recCreateTime = dateFormat(item.recCreateTime);     
+          item.planEndDate = dateFormat(item.planEndDate);
+        }); 
+
          setTimeout(() => {
                 allData.loading= false
             }, 500);
@@ -483,6 +501,11 @@
         let r = await listJobs(prams)
         allData.tableData = r.data.data
         allData.totalNum = r.data.totalNum
+        allData.tableData.forEach((item) => {
+       
+       item.recCreateTime = dateFormat(item.recCreateTime);     
+       item.planEndDate = dateFormat(item.planEndDate);
+     }); 
       }
 
       let handleCurrentChange=async(val)=>{
@@ -491,12 +514,19 @@
           deptName:allData.deptId,
           itvJobValue:allData.itvJobId,
           pageNum:val,
-          queryHis:allData.queryHisValue
+          queryHis:allData.queryHisValue,
+          startRecCreateTime:allData.startRecCreateTime,
+          endRecCreateTime:allData.endRecCreateTime,
         };
         
         let r = await listJobs(prams)
         allData.tableData = r.data.data
         allData.totalNum = r.data.totalNum
+        allData.tableData.forEach((item) => {
+       
+       item.recCreateTime = dateFormat(item.recCreateTime);     
+       item.planEndDate = dateFormat(item.planEndDate);
+     }); 
       }
 
 
@@ -550,8 +580,6 @@
         //保存选中行数据
       let handleSelectionChange = async(rows) => {
         allData.handleSelectionChange=rows;
-        console.log(rows);
-        console.log(allData.handleSelectionChange);
       }
 
       
@@ -565,7 +593,6 @@
         let prams = {
           reqNo:reqNos
         };
-        console.log(prams);
         await deleteForm2(prams);
         setTimeout(() => {
           loadTable();

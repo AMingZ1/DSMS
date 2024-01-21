@@ -8,38 +8,9 @@
           <!--点击导入抽屉-->
           <el-button type="success" round class="uploadDrawer"  @click="drawer2=true"><el-icon><Upload /></el-icon>&nbsp;导入测评信息</el-button>
           <el-row :gutter="24">
-            <el-col :span="6"><div class="grid-content ep-bg-purple" />
-              <el-input v-model="memberNameValue" placeholder="请输入人员姓名" clearable/>
-            </el-col>
-            
-            <el-col :span="6"> <div class="grid-content ep-bg-purple" />
-              <!-- 查询条件-面试结果 -->
-              <el-select v-model="itvStatusId" @change="searchTable" class="m-2"  size="mini">
-                <el-option 
-                  v-for="item in itvStatusList"
-                  :key="item.itvStatusId"
-                  :label="item.itvStatusName"
-                  :value="item.itvStatusId"
-                  ></el-option>
-              </el-select>
-            </el-col>
-           
-            <el-col :span="6"> <div class="grid-content ep-bg-purple" />
-              <el-date-picker 
-                    format="YYYYMMDD" 
-                    value-format="YYYYMMDD" 
-                    v-model="itvDate" 
-                    type="daterange" 
-                    unlink-panels 
-                    start-placeholder="面试时间起"
-                    end-placeholder="面试时间止" 
-                   />
-            </el-col>
-            
-          </el-row>
-          <el-row :gutter="24">
+
             <el-col :span="6">
-              <!-- 查询条件-部门 -->
+              <!-- 查询条件-部门 --><div class="grid-content ep-bg-purple" />
               <el-select v-model="deptId" @change="searchTable" class="m-2"  size="mini">
                 <el-option 
                   v-for="item in deptList"
@@ -50,7 +21,7 @@
               </el-select>
             </el-col>
             <el-col :span="6">
-              <!-- 查询条件-岗位 -->
+              <!-- 查询条件-岗位 --><div class="grid-content ep-bg-purple" />
               <el-select v-model="itvJobId" @change="searchTable" class="m-2"  size="mini">
                 <el-option 
                   v-for="item in itvJobList"
@@ -60,6 +31,26 @@
                   ></el-option>
               </el-select>
             </el-col>
+            
+            <el-col :span="5"> <div class="grid-content ep-bg-purple" />
+              <el-date-picker 
+                    format="YYYYMMDD" 
+                    value-format="YYYYMMDD" 
+                    v-model="startRecCreateTime" 
+                    placeholder="创建时间起"
+                   />
+            </el-col>
+            <el-col :span="5"> <div class="grid-content ep-bg-purple" />
+              <el-date-picker 
+                    format="YYYYMMDD" 
+                    value-format="YYYYMMDD" 
+                    v-model="endRecCreateTime" 
+                   placeholder="创建时间止"
+                   />
+            </el-col>
+            
+          </el-row>
+          <el-row :gutter="24">
             
             <el-col :span="6">
               <!-- 查询条件-当前状态 -->
@@ -72,7 +63,51 @@
                   ></el-option>
               </el-select>
             </el-col>
+            
+            <el-col :span="6"> 
+              <!-- 查询条件-面试结果 -->
+              <el-select v-model="itvStatusId" @change="searchTable" class="m-2"  size="mini">
+                <el-option 
+                  v-for="item in itvStatusList"
+                  :key="item.itvStatusId"
+                  :label="item.itvStatusName"
+                  :value="item.itvStatusId"
+                  ></el-option>
+              </el-select>
+            </el-col>
+
+            <el-col :span="5"> 
+              <el-date-picker 
+                    format="YYYYMMDD" 
+                    value-format="YYYYMMDD" 
+                    v-model="startItvDate" 
+                    placeholder="面试时间起"
+                   />
+            </el-col>
+            <el-col :span="5"> 
+              <el-date-picker 
+                    format="YYYYMMDD" 
+                    value-format="YYYYMMDD" 
+                    v-model="endItvDate" 
+                   placeholder="面试时间止"
+                   />
+            </el-col>
+           
+          </el-row>
+
+          <el-row :gutter="24">
+
+           
             <el-col :span="6">
+                <el-input v-model="memberNameValue" placeholder="请输入人员姓名" clearable/>
+              </el-col>
+
+
+            <el-col :span="6">
+            </el-col>
+            <el-col :span="5">
+            </el-col>
+            <el-col :span="5">
               <span></span>
               <el-tooltip content="查询" placement="top" effect="light">
                 <el-button type="primary" @click="searchTable" round ><el-icon><Search /></el-icon></el-button>
@@ -80,13 +115,18 @@
               <el-tooltip content="导出数据" placement="top" effect="light">
                 <el-button type="success" @click="exportTable()" round plain><el-icon><Download /></el-icon></el-button>
               </el-tooltip>
+              <el-tooltip content="删除数据" placement="top" effect="light">
+                <el-button type="success" @click="deleteTable()"  round plain> 删除</el-button>
+              </el-tooltip>   
             </el-col>
-          </el-row>
+        </el-row>
         </div>
 
         <div class="tableDiv">  
-          <el-table v-loading="loading" :data="tableData" stripe border style="width: 100%" >
+          <el-table v-loading="loading" :data="tableData" stripe border style="width: 100%" 
+          @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="40" />
+            <el-table-column   prop="itvNo" label="面联记录号" width="120" v-if="false"/>
             <el-table-column   prop="planNo" label="电联记录号" width="120" v-if="false"/>
             <el-table-column   prop="reqNo" label="岗位需求编号" width="120" v-if="false"/>
             <el-table-column fixed prop="memberName" lazy label="面试人员" width="100"  >
@@ -194,6 +234,7 @@
             <el-table-column prop="arrivalDate" label="报道时间"  width="200" />
             <el-table-column prop="hopeSalary" label="期望薪资"  width="130" />
             <el-table-column prop="evaluation" show-overflow-tooltip label="入库主观评价"  width="300" />
+            <el-table-column prop="recCreateTime"   label="创建时间" width="120" />
             <el-table-column fixed="right" label="操作" width="350">
               <template #default="scope">
                 <el-button type="success" size="small" @click="updateFileItvNo(scope.row,true)">上传</el-button>
@@ -529,7 +570,7 @@
 
 <script>
 import { reactive, toRefs } from '@vue/reactivity'
-import {listTable,addForm,updateForm,deleteForm,importFiles,
+import {listTable,addForm,updateForm,deleteForm,importFiles,deleteForm2,
   getAllFiles,downloadFile,importFiles2,removeFile} from '../../../api/sdhr04'
 import {insertOf01} from '../../../api/sdof01'
 import {itemList} from '../../../api/itemApi'
@@ -547,6 +588,7 @@ import {
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
 import { ref } from "vue";
+import { Delete, DeleteLocation, DocumentDelete } from '@element-plus/icons-vue'
 
 use([
   CanvasRenderer,
@@ -558,8 +600,11 @@ use([
 export default {
     name:'Sdhr04',
     components: {
-        VChart
-    },
+    VChart,
+    Delete,
+    DeleteLocation,
+    DocumentDelete
+},
     provide: {
       [THEME_KEY]: "light"
     },
@@ -625,7 +670,10 @@ export default {
             archiveStatusBfrList:[{archiveStatusBfrId:'',archiveStatusBfrName:'请选择归档前状态'}],
             educationBckrId:'',
             educationBckrList:[{educationBckrId:'',educationBckrName:'请选择学历'}],
-
+            endRecCreateTime:'',
+            startRecCreateTime:'',
+            startItvDate:'',
+            endItvDate:'',
             openDrawer:false,
             openDrawer2:false,
             isAdd:true,
@@ -785,12 +833,31 @@ export default {
           
         }
         loadEducationBckrList();
+
+          //格式化日期展示
+      let dateFormat2= (date) =>{
+        if(date==" " || date==""){
+          return "";
+        }
+        let year=date.substr(0, 4);
+        let month= date.substr(4, 2);
+        let day=date.substr(6, 2);      
+        // 拼接
+        return year+"-"+month+"-"+day;
+      }
+
         //查询表单数据
         let loadTable= async()=>{
           let r = await listTable()
           // allData.tableData = r.data
-          allData.tableData = r.data.data
-          allData.totalNum = r.data.totalNum
+          allData.tableData = r.data.data;
+          allData.totalNum = r.data.totalNum;
+          allData.tableData.forEach((item) => {
+          item.recCreateTime = dateFormat2(item.recCreateTime);         
+          item.itvDate = dateFormat2(item.itvDate);
+          item.arrivalDate = dateFormat2(item.arrivalDate);
+        }); 
+
           setTimeout(() => {
                 allData.loading= false
             }, 500);
@@ -798,21 +865,26 @@ export default {
         loadTable()
 
         let searchTable = async()=>{
-          let itvDateStr
-          if(allData.itvDate!=null){
-            itvDateStr= allData.itvDate[0]+','+allData.itvDate[1]
-          }
+          
           let prams = {
             memberName:allData.memberNameValue,
             itvDept:allData.deptId,
             itvJob:allData.itvJobId,
-            itvDate:itvDateStr,
             itvStatus:allData.itvStatusId,
-            nowStatus:allData.nowStatusId
+            nowStatus:allData.nowStatusId,
+            startRecCreateTime:allData.startRecCreateTime,
+            endRecCreateTime:allData.endRecCreateTime,
+            startItvDate:allData.startItvDate,
+            endItvDate:allData.endItvDate
           };
-          let r = await listTable(prams)
-          allData.tableData = r.data.data
-          allData.totalNum = r.data.totalNum
+          let r = await listTable(prams);
+          allData.tableData = r.data.data;
+          allData.totalNum = r.data.totalNum;
+          allData.tableData.forEach((item) => {
+          item.recCreateTime = dateFormat2(item.recCreateTime);         
+          item.itvDate = dateFormat2(item.itvDate);
+          item.arrivalDate = dateFormat2(item.arrivalDate);
+        }); 
           setTimeout(() => {
                   allData.loading= false
               }, 500);
@@ -820,23 +892,27 @@ export default {
 
       //分页切换
       let handleCurrentChange=async(val)=>{
-        let itvDateStr
-        if(allData.itvDate!=null){
-          itvDateStr= allData.itvDate[0]+','+allData.itvDate[1]
-        }
         let prams = {
           memberName:allData.memberNameValue,
           itvDept:allData.deptId,
           itvJob:allData.itvJobId,
-          itvDate:itvDateStr,
           itvStatus:allData.itvStatusId,
           nowStatus:allData.nowStatusId,
-          pageNum:val
+          pageNum:val,
+          startRecCreateTime:allData.startRecCreateTime,
+          endRecCreateTime:allData.endRecCreateTime,
+          startItvDate:allData.startItvDate,
+          endItvDate:allData.endItvDate
         };
 
-        let r = await listTable(prams)
-        allData.tableData = r.data.data
-        allData.totalNum = r.data.totalNum
+        let r = await listTable(prams);
+        allData.tableData = r.data.data;
+        allData.totalNum = r.data.totalNum;
+        allData.tableData.forEach((item) => {
+          item.recCreateTime = dateFormat2(item.recCreateTime);         
+          item.itvDate = dateFormat2(item.itvDate);
+          item.arrivalDate = dateFormat2(item.arrivalDate);
+        }); 
         }
 
         //新增数据
@@ -1102,22 +1178,46 @@ export default {
        //导出数据
        let exportTable = async() => {
         let name ="面试测评信息导出.xlsx";
-        let itvDateStr
-          if(allData.itvDate!=null){
-            itvDateStr= allData.itvDate[0]+','+allData.itvDate[1]
-          }
+       
         let params = {
             memberName:allData.memberNameValue,
             itvDept:allData.deptId,
             itvJob:allData.itvJobId,
-            itvDate:itvDateStr,
             itvStatus:allData.itvStatusId,
-            nowStatus:allData.nowStatusId
+            nowStatus:allData.nowStatusId,
+            startRecCreateTime:allData.startRecCreateTime,
+            endRecCreateTime:allData.endRecCreateTime,
+            startItvDate:allData.startItvDate,
+            endItvDate:allData.endItvDate
         };
         let url = "Sdhr04/export";
         await downloadFile(url,params,name)
         
       }
+
+
+        //保存选中行数据
+      let handleSelectionChange = async(rows) => {
+          allData.handleSelectionChange=rows;
+        
+        }
+
+       //删除数据 减选中数据的ID拼接转入到后台
+       let deleteTable = async() => {
+        let itvNos = "";
+        allData.handleSelectionChange.forEach((item) => {  
+          itvNos  += item.itvNo+",";
+        }); 
+        itvNos =itvNos.substring(0,itvNos.length-1);
+        let prams = {
+          itvNo:itvNos
+        };
+        await deleteForm2(prams);
+        setTimeout(() => {
+          searchTable();
+        }, 2000);
+      }
+
 
         return {
             ...toRefs(allData),
@@ -1134,8 +1234,8 @@ export default {
             loadItvStatusList,
             addCloud,
             addFormToCloud,handleCurrentChange,fileRemove,
-            importPersonFile,handlePreview,updateFileItvNo,fileRequest,filePreview,exportTable
-            
+            importPersonFile,handlePreview,updateFileItvNo,fileRequest,filePreview,exportTable,
+            handleSelectionChange,deleteTable
         }
     }
 }
@@ -1196,6 +1296,9 @@ export default {
     }
     .el-col {
       border-radius: 4px;
+      .el-input{
+        width: 90%;
+      }
       .m-2{
         width: 90%;
         color: black;

@@ -46,20 +46,22 @@
                     ></el-option>
                 </el-select>
               </el-col>
-            </el-row>
-
-            <el-row :gutter="24">
-              <el-col :span="6">
-                <!-- 查询条件-渠道 -->
-                <el-select v-model="channelId" @change="searchTable" class="m-2"  size="mini">
+              <el-col :span="6"> <div class="grid-content ep-bg-purple" />
+                <!-- 查询条件-归档原因 -->
+                <el-select v-model="acvReasonId"  @change="searchTable" class="m-2"  size="mini">
                     <el-option 
-                      v-for="item in channelList"
-                      :key="item.channelId"
-                      :label="item.channelName"
-                      :value="item.channelId"
+                      v-for="item in acvReasonList"
+                      :key="item.acvReasonId"
+                      :label="item.acvReasonName"
+                      :value="item.acvReasonId"
                       ></el-option>
                 </el-select>
               </el-col>
+              
+            </el-row>
+
+      
+            <el-row :gutter="24">
               <el-col :span="6">
                 <!-- 查询条件-学历 -->
                 <el-select v-model="edcBckrId" @change="searchTable" class="m-2"  size="mini">
@@ -71,18 +73,23 @@
                       ></el-option>
                 </el-select>
               </el-col>
-              <el-col :span="6">
-                <!-- 查询条件-归档原因 -->
-                <el-select v-model="acvReasonId"  @change="searchTable" class="m-2"  size="mini">
-                    <el-option 
-                      v-for="item in acvReasonList"
-                      :key="item.acvReasonId"
-                      :label="item.acvReasonName"
-                      :value="item.acvReasonId"
-                      ></el-option>
-                </el-select>
-              </el-col>
-            
+              <el-col :span="6"> 
+              <el-date-picker  style="width:90%"
+                    format="YYYYMMDD" 
+                    value-format="YYYYMMDD" 
+                    v-model="startRecCreateTime" 
+                    placeholder="创建时间起"
+                   />
+            </el-col>
+            <el-col :span="6"> 
+              <el-date-picker  style="width:90%"
+                    format="YYYYMMDD" 
+                    value-format="YYYYMMDD" 
+                    v-model="endRecCreateTime" 
+                   placeholder="创建时间止"
+                   />
+            </el-col>
+         
               <el-col :span="6">
                 <span></span>
                 <el-tooltip content="查询" placement="top" effect="light">
@@ -91,11 +98,16 @@
                 <el-tooltip content="导出数据" placement="top" effect="light">
                   <el-button type="success" @click="exportTable" round plain><el-icon><Download /></el-icon></el-button>
                 </el-tooltip>
+                <el-tooltip content="删除数据" placement="top" effect="light">
+                <el-button type="success" @click="deleteTable()"  round plain> 删除</el-button>
+              </el-tooltip>  
               </el-col>
             </el-row>
+
           </div>
         
-        <el-table :data="tableData" stripe border style="width: 100%" >
+        <el-table :data="tableData" stripe border style="width: 100%" 
+        @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="40" />
           <el-table-column  prop="memberNo" label="人才编号" width="100" v-if="false" />
           <el-table-column fixed prop="memberName" label="姓名" width="100" />
@@ -362,7 +374,7 @@
 
 <script>
 import { reactive, toRefs } from '@vue/reactivity'
-import {listCloud,addToCloud,updateForm,deleteForm,
+import {listCloud,addToCloud,updateForm,deleteForm,deleteForm2,
   getAllFiles,importFiles,downloadFile,importFiles2,removeFile} from '../../../api/sdhr03'
 import {itemList} from '../../../api/itemApi'
 import { Base64 } from 'js-base64';
@@ -401,6 +413,8 @@ export default {
         itvJobId:'',
         itvJobList:[{itvJobId:'',itvJobName:'请选择面试岗位'}],
         itvJobList2:[],
+        endRecCreateTime:'',
+        startRecCreateTime:'',
         memberNameValue:'',
         deptNameValue:'',
         itvJobNameValue:'',
@@ -428,12 +442,9 @@ export default {
         }
         let year=date.substr(0, 4);
         let month= date.substr(4, 2);
-        let day=date.substr(6, 2);
-        let hours=date.substr(8, 2);
-        let minutes=date.substr(10, 2);
-        let seconds=date.substr(12, 2);      
+        let day=date.substr(6, 2);      
         // 拼接
-        return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
+        return year+"-"+month+"-"+day;
       }
 
       //渠道下拉框
@@ -557,7 +568,9 @@ export default {
           channel:allData.channelId,
           archiveReason:allData.acvReasonId,
           archiveStatusbfr:allData.acvStatusId,
-          educationBckr:allData.edcBckrId
+          educationBckr:allData.edcBckrId,
+          startRecCreateTime:allData.startRecCreateTime,
+            endRecCreateTime:allData.endRecCreateTime,
         };
         let r = await listCloud(prams)
         allData.tableData = r.data.data;
@@ -633,6 +646,8 @@ export default {
           archiveReason:allData.acvReasonId,
           archiveStatusbfr:allData.acvStatusId,
           educationBckr:allData.edcBckrId,
+          startRecCreateTime:allData.startRecCreateTime,
+          endRecCreateTime:allData.endRecCreateTime,
           pageNum:val
         };
         let r = await listCloud(prams)
@@ -658,7 +673,7 @@ export default {
         searchTable();
       }
 
-       //导出人员模版
+       //导入人员模版
       let downloadPersonFile =async()=>{
         let name ="人才库导入模板.xls";
         let params = {
@@ -763,10 +778,34 @@ export default {
               channel:allData.channelId,
               archiveReason:allData.acvReasonId,
               archiveStatusbfr:allData.acvStatusId,
-              educationBckr:allData.edcBckrId
+              educationBckr:allData.edcBckrId,
+              startRecCreateTime:allData.startRecCreateTime,
+              endRecCreateTime:allData.endRecCreateTime,
             };
               let url = "Sdhr03/export";
               await downloadFile(url,params,name)       
+      }
+
+      //保存选中行数据
+      let handleSelectionChange = async(rows) => {
+          allData.handleSelectionChange=rows;
+        
+        }
+
+       //删除数据 减选中数据的ID拼接转入到后台
+       let deleteTable = async() => {
+        let memberNos = "";
+        allData.handleSelectionChange.forEach((item) => {  
+          memberNos  += item.memberNo+",";
+        }); 
+        memberNos =memberNos.substring(0,memberNos.length-1);
+        let prams = {
+          memberNo:memberNos
+        };
+        await deleteForm2(prams);
+        setTimeout(() => {
+          searchTable();
+        }, 2000);
       }
 
 
@@ -774,7 +813,7 @@ export default {
       return{
         ...toRefs(allData),
         loadTable,loadEdcBckrList,loadChannelList,searchTable,loadDeptList,loadAcvStatusList,loadItvJobList,handleEdit,drawerClose,editForm,handleDelete,handleCurrentChange
-        ,importPersonFile,downloadPersonFile,updateFileId,fileRemove,fileRequest,filePreview,exportTable,handlePreview,
+        ,importPersonFile,downloadPersonFile,updateFileId,fileRemove,fileRequest,filePreview,exportTable,handlePreview,handleSelectionChange,deleteTable
       }
     }
 }
@@ -829,6 +868,8 @@ export default {
       .el-input{
         width: 90%;
       }
+
+      
       .m-2{
         width: 90%;
         color: black;

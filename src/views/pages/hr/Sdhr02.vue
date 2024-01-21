@@ -29,19 +29,49 @@
                         ></el-option>
                     </el-select>
                   </el-col>
-                  <el-col :span="6"><div class="grid-content ep-bg-purple" />
-                    <el-tooltip content="查询" placement="top" effect="light">
-                      <el-button type="primary" @click="searchTable1" round ><el-icon><Search /></el-icon></el-button>
-                    </el-tooltip>
-                    <el-tooltip content="导出数据" placement="top" effect="light">
-                      <el-button type="success" @click="exportTable('1')"  round plain><el-icon><Download /></el-icon></el-button>
-                    </el-tooltip>
-                  </el-col>
+                  
                 </el-row>
+
+                <el-row :gutter="24">
+                <el-col :span="6"> 
+                  <el-date-picker  style="width:100%"
+                        format="YYYYMMDD" 
+                        value-format="YYYYMMDD" 
+                        v-model="startRecCreateTime" 
+                        placeholder="创建时间起"
+                      />
+                </el-col>
+              <el-col :span="6"> 
+                <el-date-picker  style="width:100%"
+                      format="YYYYMMDD" 
+                      value-format="YYYYMMDD" 
+                      v-model="endRecCreateTime" 
+                    placeholder="创建时间止"
+                    />
+              </el-col>
+              <el-col :span="6">
+              </el-col>
+
+              <el-col :span="6">
+                      <el-tooltip content="查询" placement="top" effect="light">
+                        <el-button type="primary" @click="searchTable1" round ><el-icon><Search /></el-icon></el-button>
+                      </el-tooltip>
+                      <el-tooltip content="导出数据" placement="top" effect="light">
+                        <el-button type="success" @click="exportTable('1')"  round plain><el-icon><Download /></el-icon></el-button>
+                      </el-tooltip>
+                      <el-tooltip content="删除数据" placement="top" effect="light">
+                      <el-button type="success" @click="deleteTable()"  round plain>删除</el-button>
+                    </el-tooltip>
+                    </el-col>
+
+            </el-row>
+
                 
             </div>
-                <el-table v-loading="loading" :data="tableData" stripe border style="width: 100%" >
+                <el-table v-loading="loading" :data="tableData" stripe border style="width: 100%"
+                    @selection-change="handleSelectionChange" >
                     <el-table-column type="selection" width="40" />
+                    <el-table-column fixed prop="recCreateTime"   label="创建时间" width="120" />
                     <el-table-column  fixed prop="planNo" label="电联记录号" width="120" />
                     <el-table-column  fixed prop="reqNo" label="岗位需求编号" width="120"/>      
                     <el-table-column  fixed prop="memberName" label="姓名" width="100"/>
@@ -55,14 +85,14 @@
                         <el-tag size="large" v-if="scope.row.contactStatus=='50'"  >已关闭</el-tag>
                       </template>
                     </el-table-column>
-
                     <el-table-column  prop="contactMember" label="联系人" width="100"/>
-                    <el-table-column prop="contactDate" label="联系时间" width="100"/>
+                    <el-table-column prop="contactDate" label="联系时间" width="120"/>
                     <el-table-column  label="简历附件" width="100">
                       <template #default="scope">
                         <el-link type="primary" @click="updateFilePlanNo(scope.row,false)">查看</el-link>
                       </template>
                     </el-table-column>
+                    
                     <el-table-column prop="itvRemark" show-overflow-tooltip label="备注" width="500"  />
                     <el-table-column fixed="right" label="操作" width="200">
                       <template #default="scope">
@@ -174,7 +204,7 @@
             <div class="center">
               <el-row :gutter="24">
                 <el-col :span="6">
-                  <el-input v-model="memberNameValue3"  placeholder="请输入人员姓名" clearable/>
+                  <el-input  style="width:90%" v-model="memberNameValue3"  placeholder="请输入人员姓名" clearable/>
                 </el-col>
                 <el-col :span="6">
                   <!-- 查询条件-部门 -->
@@ -203,7 +233,7 @@
                 </el-col>
               </el-row>
               <el-row :gutter="24">
-                <el-col :span="6">
+                <!-- <el-col :span="6">
                   <el-date-picker 
                     format="YYYYMMDD" 
                     value-format="YYYYMMDD" 
@@ -213,7 +243,7 @@
                     start-placeholder="面试时间起"
                     end-placeholder="面试时间止" 
                    />
-                </el-col>
+                </el-col> -->
                 <el-col :span="6">
                    <!-- 查询条件-职业状态 -->
                    <el-select v-model="workStatusId" @change="searchTable3" class="m-2"  size="mini">
@@ -235,6 +265,9 @@
                       :value="item.itvStatusId"
                       ></el-option>
                   </el-select>
+                </el-col>
+                <el-col :span="6">
+                 
                 </el-col>
                 <el-col :span="6">
                   <el-tooltip content="查询" placement="top" effect="light">
@@ -296,7 +329,7 @@
               <el-table-column fixed="right" label="操作" width="140">
               <template #default="scope">
               <el-button type="primary" size="small" @click="handleEditTab3(scope.row)">更新</el-button>
-              <el-button type="danger" size="small" @click="handleDelete2(scope.row)">删除</el-button>
+              
               </template>
             </el-table-column>
             </el-table>
@@ -743,7 +776,7 @@ import {reactive,toRefs} from 'vue'
 //导入访问后台API
 import {listJobs} from '../../../api/sdhr01'
 import {listPerson,addForm,updateForm,
-  deleteForm,getAllFiles,importFiles,downloadFile,importFiles2,removeFile} from '../../../api/sdhr02'
+  deleteForm,getAllFiles,importFiles,downloadFile,importFiles2,removeFile,deleteForm2} from '../../../api/sdhr02'
 import {addToCloud} from '../../../api/sdhr03'
 import {itemList} from '../../../api/itemApi'
 import { Base64 } from 'js-base64';
@@ -863,6 +896,8 @@ export default {
             memberNameValue1:'',
             contactStatusValue1:'',
             memberNameValue2:'',
+            endRecCreateTime:'',
+            startRecCreateTime:'',
             //tab3查询区域内容
             memberNameValue3:'',
             deptId2:'',
@@ -1015,11 +1050,30 @@ export default {
           
         }
         loadItvStatusList()
+
+
+        //格式化日期展示
+      let dateFormat2= (date) =>{
+        if(date==" " || date==""){
+          return "";
+        }
+        let year=date.substr(0, 4);
+        let month= date.substr(4, 2);
+        let day=date.substr(6, 2);      
+        // 拼接
+        return year+"-"+month+"-"+day;
+      }
+
       //加载tab1页表格数据
       let loadTable = async()=>{
-        let r = await listPerson()
-        allData.tableData = r.data.data
-        allData.totalNumTab1 = r.data.totalNum
+        let r = await listPerson();
+        allData.tableData = r.data.data;
+        allData.totalNumTab1 = r.data.totalNum;
+        allData.tableData.forEach((item) => {
+          item.recCreateTime = dateFormat2(item.recCreateTime);     
+          item.contactDate = dateFormat2(item.contactDate);
+        }); 
+
         setTimeout(() => {
           allData.loading= false
         }, 500);
@@ -1029,9 +1083,14 @@ export default {
         let prams = {
             contactStatus:'20,30,40',
         }
-        let r = await listPerson(prams)
-        allData.tableData2 = r.data.data
-        allData.totalNumTab2 = r.data.totalNum
+        let r = await listPerson(prams);
+        allData.tableData2 = r.data.data;
+        allData.totalNumTab2 = r.data.totalNum;
+
+        allData.tableData2.forEach((item) => {
+          item.itvDate = dateFormat2(item.itvDate); 
+        }); 
+
       }
 
       //加载tab3页表格数据
@@ -1039,9 +1098,13 @@ export default {
         let prams = {
             contactStatus:'20,30,40,50'
         }
-        let r = await listPerson(prams)
-        allData.tableData3 = r.data.data
-        allData.totalNumTab3 = r.data.totalNum
+        let r = await listPerson(prams);
+        allData.tableData3 = r.data.data;
+        allData.totalNumTab3 = r.data.totalNum;
+        allData.tableData3.forEach((item) => {
+          item.itvDate = dateFormat2(item.itvDate); 
+          item.arrivalDate = dateFormat2(item.arrivalDate); 
+        }); 
       }
       loadTable()
 
@@ -1055,12 +1118,18 @@ export default {
         let prams = {
           reqNo:allData.reqNoValue1,
           memberName:allData.memberNameValue1,
-          contactStatus:allData.contactStatusId
+          contactStatus:allData.contactStatusId,
+          startRecCreateTime:allData.startRecCreateTime,
+          endRecCreateTime:allData.endRecCreateTime
         };
         
-        let r = await listPerson(prams)
-        allData.tableData = r.data.data
-        allData.totalNumTab1 = r.data.totalNum
+        let r = await listPerson(prams);
+        allData.tableData = r.data.data;
+        allData.totalNumTab1 = r.data.totalNum;
+        allData.tableData.forEach((item) => {
+          item.recCreateTime = dateFormat2(item.recCreateTime);     
+          item.contactDate = dateFormat2(item.contactDate);
+        }); 
       }
       //Tab1电话邀约新增/修改方法
       let editFormTab1 = async()=>{
@@ -1102,9 +1171,12 @@ export default {
           contactStatus:'20,30,40'
         };
         
-        let r = await listPerson(prams)
-        allData.tableData2 = r.data.data
-        allData.totalNumTab2 = r.data.totalNum
+        let r = await listPerson(prams);
+        allData.tableData2 = r.data.data;
+        allData.totalNumTab2 = r.data.totalNum;
+        allData.tableData.forEach((item) => {
+          item.itvDate = dateFormat2(item.itvDate); 
+        }); 
       }
 
       //Tab2新增/修改方法
@@ -1138,9 +1210,13 @@ export default {
           itvStatus:allData.itvStatusId
         };
         
-        let r = await listPerson(prams)
-        allData.tableData3 = r.data.data
-        allData.totalNumTab3 = r.data.totalNum
+        let r = await listPerson(prams);
+        allData.tableData3 = r.data.data;
+        allData.totalNumTab3 = r.data.totalNum;
+        allData.tableData.forEach((item) => {
+          item.itvDate = dateFormat2(item.itvDate); 
+          item.arrivalDate = dateFormat2(item.arrivalDate); 
+        }); 
       }
 
       //tab3修改
@@ -1240,6 +1316,7 @@ export default {
       return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
     }
 
+    
 
      //导入人员附件
       let importPersonFile = async(a) => {
@@ -1359,7 +1436,9 @@ export default {
               let params = {
                 reqNo:allData.reqNoValue1,
                 memberName:allData.memberNameValue1,
-                contactStatus:allData.contactStatusId
+                contactStatus:allData.contactStatusId,
+                startRecCreateTime:allData.startRecCreateTime,
+                endRecCreateTime:allData.endRecCreateTime
               };
               let url = "Sdhr02/export";
               await downloadFile(url,params,name)
@@ -1386,6 +1465,27 @@ export default {
           }
       }
       
+       //保存选中行数据
+     let handleSelectionChange = async(rows) => {
+        allData.handleSelectionChange=rows;
+       
+      }
+
+       //删除数据 减选中数据的ID拼接转入到后台
+       let deleteTable = async() => {
+        let planNos = "";
+        allData.handleSelectionChange.forEach((item) => {  
+          planNos  += item.planNo+",";
+        }); 
+        planNos =planNos.substring(0,planNos.length-1);
+        let prams = {
+          planNo:planNos
+        };
+        await deleteForm2(prams);
+        setTimeout(() => {
+          searchTable1();
+        }, 2000);
+      }
 
        //关闭Tab1表单事件
        let drawerClose = ()=>{
@@ -1495,11 +1595,17 @@ export default {
           memberName:allData.memberNameValue1,
           contactStatus:allData.contactStatusId,
           pageNum:val,
+          startRecCreateTime:allData.startRecCreateTime,
+          endRecCreateTime:allData.endRecCreateTime,
         };
         
-        let r = await listPerson(prams)
-        allData.tableData = r.data.data
-        allData.totalNumTab1 = r.data.totalNum
+        let r = await listPerson(prams);
+        allData.tableData = r.data.data;
+        allData.totalNumTab1 = r.data.totalNum;
+        allData.tableData.forEach((item) => {
+          item.recCreateTime = dateFormat2(item.recCreateTime);     
+          item.contactDate = dateFormat2(item.contactDate);
+        }); 
 
       }
 
@@ -1512,9 +1618,12 @@ export default {
           pageNum:val,
         };
 
-        let r = await listPerson(prams)
-        allData.tableData2 = r.data.data
-        allData.totalNumTab2 = r.data.totalNum
+        let r = await listPerson(prams);
+        allData.tableData2 = r.data.data;
+        allData.totalNumTab2 = r.data.totalNum;
+        allData.tableData2.forEach((item) => {
+          item.itvDate = dateFormat2(item.itvDate); 
+        }); 
 
         }
 
@@ -1526,9 +1635,13 @@ export default {
           pageNum:val,
         };
 
-        let r = await listPerson(prams)
-        allData.tableData3 = r.data.data
-        allData.totalNumTab3 = r.data.totalNum
+        let r = await listPerson(prams);
+        allData.tableData3 = r.data.data;
+        allData.totalNumTab3 = r.data.totalNum;
+        allData.tableData3.forEach((item) => {
+          item.itvDate = dateFormat2(item.itvDate); 
+          item.arrivalDate = dateFormat2(item.arrivalDate); 
+        }); 
 
         }
 
@@ -1574,6 +1687,7 @@ export default {
         downloadPersonFile,
         importPersonFile,
         handlePreview,
+        deleteTable,handleSelectionChange
       }
     }
 }

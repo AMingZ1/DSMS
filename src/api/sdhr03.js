@@ -60,6 +60,18 @@ export let deleteForm = async(params)=>{
     
   }
 
+  //删除表单数据(逻辑删除)
+export let deleteForm2 = async(params)=>{
+    await $confirm('确定删除当前选中的数据吗?')
+    let data =await $put('Sdhr03/deletesSdhr03',params)
+    if(data.success!='-1'){
+        $msg_success('删除成功')
+    }else{
+      $msg_error('删除失败'+data.message)
+    }
+    
+  }
+
  //非空验证
 let check=(params)=>{
     let message;
