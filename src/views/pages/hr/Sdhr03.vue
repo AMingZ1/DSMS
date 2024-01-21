@@ -548,8 +548,7 @@ export default {
          allData.totalNum = r.totalNum;
 
          allData.tableData.forEach((item) => {
-          let time = dateFormat(item.recCreateTime);
-          item.recCreateTime = time;
+          item.recCreateTime = dateFormat(item.recCreateTime);
           
           item.archiveDate = dateFormat(item.archiveDate);
         }); 
