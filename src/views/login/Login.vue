@@ -1,77 +1,83 @@
 <template>
     <!-- userId:admin,passWord:12345 -->
     <!-- userId:DS0001,passWord:54321  -->
-    <div class="container">
-        <!-- <img src="../../images/sdLog.png" alt=""/> -->
-        <div>
-            <div class="imgDiv">
-                <img src="../../images/sdLog.png" alt=""/>
+    <div class="background">
+                <img src="../../images/background.jpg"  alt=""/>
+    
             </div>
-            <div class="login">
-                <div class="item">
-                        <h2>欢迎登录</h2>
+        <div class="container">
+            <!-- <img src="../../images/sdLog.png" alt=""/> -->
+            <div>
+                <div class="imgDiv">
+                    <img src="../../images/sdLog.png" alt=""/>
                 </div>
-                <div class="item">
-                    <h2>沈阳东硕信息技术有限公司</h2>
-                </div>
-                <div class="item">
-                        <span>账号：</span>
+                <div class="login">
+                    <div class="item">
+                            <h2>欢迎登录</h2>
                     </div>
-                <div class="item">
-                        <el-input v-model="userId" placeholder="请输入账号" />
+                    <div class="item">
+                        <h2>沈阳东硕信息技术有限公司</h2>
+                    </div>
+                    <div class="item">
+                            <span>账号：</span>
+                        </div>
+                    <div class="item">
+                            <el-input v-model="userId" placeholder="请输入账号" />
+                    </div>
+                    <div class="item">
+                            <span>密码：</span>
+                    </div>
+                    <div class="item">
+                            <el-input v-model="passWord" type="password" placeholder="请输入密码" show-password />
+                    </div>
+                    <div class="item">
+                            <el-checkbox v-model="ckMe"  />
+                            <span class="checkboxText">&nbsp;记住我</span>
+                    </div>
+                    <div class="item">
+                            <el-button size="large" @click="adminLogin" >登录</el-button>
+                    </div>
                 </div>
-                <div class="item">
-                        <span>密码：</span>
-                </div>
-                <div class="item">
-                        <el-input v-model="passWord" type="password" placeholder="请输入密码" show-password />
-                </div>
-                <div class="item">
-                        <el-checkbox v-model="ckMe"  />
-                        <span class="checkboxText">&nbsp;记住我</span>
-                </div>
-                <div class="item">
-                        <el-button size="large" @click="adminLogin" >登录</el-button>
-                </div>
-             </div>
 
-             
-            
+                
+                
+                
+            </div>
             
         </div>
-        
-    </div>
-    <div class="footer">
-        <el-container>
-            <el-footer>
-                <div class="bottom">
-                    <el-link type="warning" href="https://beian.miit.gov.cn/" target="_blank">
-                        <h5>辽ICP备2022011797号-2 &nbsp;</h5>
-                    </el-link>
+        <div class="footer">
+            <el-container>
+                <el-footer>
+                    <div class="bottom">
+                        <el-link type="warning" href="https://beian.miit.gov.cn/" target="_blank">
+                            <h5>辽ICP备2022011797号-2 &nbsp;</h5>
+                        </el-link>
+                        <el-link type="warning" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=21010202000970" target="_blank">
+                            <img src="../../images/beiAn.png" style="float:left;"/><h5>辽公网安备 21010202000970号 &nbsp;</h5>
+                        </el-link>
+                        <el-link type="warning" href="" target="_blank">
+                            <h5> 电话：024-23994399 &nbsp;邮编：110000&nbsp;  地址：沈阳市和平区三好街90-5号1-19-5&nbsp;投诉建议渠道：024-23994399</h5>
+                            
+                        </el-link>
+                    </div>
+                    <!-- <div class="bottom1">
                     <el-link type="warning" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=21010202000970" target="_blank">
-                        <img src="../../images/beiAn.png" style="float:left;"/><h5>辽公网安备 21010202000970号 &nbsp;</h5>
-                    </el-link>
-                    <el-link type="warning" href="" target="_blank">
-                        <h5> 电话：024-23994399 &nbsp;邮编：110000&nbsp;  地址：沈阳市和平区三好街90-5号1-19-5&nbsp;投诉建议渠道：024-23994399</h5>
+                            <img src="../../images/beiAn.png" style="float:left;"/><h5>辽公网安备 21010202000970号</h5>
+                        </el-link> 
+                    </div>
+                    <div class="bottom1">
+                        <el-link type="warning" href="" target="_blank">
+                            <h5> 电话：024-23994399 邮编：110000  地址：沈阳市和平区三好街90-5号1-19-5投诉建议渠道：024-23994399</h5>
+                            
+                        </el-link>
                         
-                    </el-link>
-                </div>
-                 <!-- <div class="bottom1">
-                   <el-link type="warning" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=21010202000970" target="_blank">
-                        <img src="../../images/beiAn.png" style="float:left;"/><h5>辽公网安备 21010202000970号</h5>
-                    </el-link> 
-                </div>
-                <div class="bottom1">
-                     <el-link type="warning" href="" target="_blank">
-                        <h5> 电话：024-23994399 邮编：110000  地址：沈阳市和平区三好街90-5号1-19-5投诉建议渠道：024-23994399</h5>
-                        
-                    </el-link>
+                    </div> -->
                     
-                </div> -->
-                
-            </el-footer>
-        </el-container>
-    </div>
+                </el-footer>
+            </el-container>
+        </div>
+
+    
     
 </template>
 
@@ -130,6 +136,18 @@
 </script>
 
 <style  scope lang="scss">
+
+    .background{
+
+        width:100%;  
+
+        height:100%; 
+
+        z-index:-1;
+
+        position: fixed;
+    }
+
     .container{
         height: 90vh;
         width: 100vw;
@@ -150,6 +168,8 @@
                 vertical-align: middle;
         }
         }
+
+      
         
         .login{
             width: 350px;

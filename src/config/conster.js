@@ -9,7 +9,7 @@ let model = {
     // dev:'http://172.20.10.2:8081',  
     //家里  
     // dev:'http://192.168.2.3:8081',  
-    // dev:'http://localhost:8081,
+    // dev:'http://localhost:8081',
     //测试阶段访问接口地址
     test:'',
     //正式阶段访问接口地址
